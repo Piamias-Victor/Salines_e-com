@@ -3,10 +3,5 @@
     "devCommand": "cd apps/web && npm run dev",
     "installCommand": "npm install",
     "framework": "nextjs",
-    "outputDirectory": "apps/web/.next",
-    "env": {
-        "DATABASE_URL": "@database_url",
-        "NEXTAUTH_SECRET": "@nextauth_secret",
-        "NEXTAUTH_URL": "@nextauth_url"
-    }
+    "outputDirectory": "apps/web/.next"
 }
