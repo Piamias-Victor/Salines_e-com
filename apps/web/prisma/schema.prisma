@@ -1,0 +1,555 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modèle principal pour les produits de la pharmacie
+model Product {
+  id               String  @id @default(cuid())
+  name             String
+  ean              String  @unique // Code EAN unique
+  sku              String? @unique // Référence interne
+  description      String? @db.Text // Description complète
+  shortDescription String? @db.Text // Description courte pour les listes
+  slug             String  @unique // URL slug pour le produit
+
+  // Images
+  imageUrl String? // Image principale (gardée pour compatibilité/facilité)
+  images   ProductImage[] // Galerie d'images
+
+  // Gestion des prix
+  priceHT  Decimal @db.Decimal(10, 2) // Prix Hors Taxe
+  priceTTC Decimal @db.Decimal(10, 2) // Prix TTC
+  tva      Decimal @db.Decimal(5, 2) // Taux de TVA (ex: 20.00 pour 20%)
+
+  // Gestion du stock
+  stock            Int  @default(0) // Quantité en stock
+  maxOrderQuantity Int? // Limite de commande par panier
+
+  // Caractéristiques physiques
+  weight Decimal? @db.Decimal(10, 3) // Poids en kg
+
+  // Spécificités Pharmacie
+  isMedicament Boolean @default(false) // Est-ce un médicament ?
+  notice       String? @db.Text // Notice obligatoire si médicament
+  composition  String? @db.Text // Composition détaillée
+  usageTips    String? @db.Text // Conseils d'utilisation
+  precautions  String? @db.Text // Précautions d'emploi
+
+  // SEO
+  metaTitle       String?
+  metaDescription String? @db.Text
+
+  // Statut et promotion
+  isActive    Boolean @default(true) // Produit actif ou inactif
+  position    Int     @default(0) // Position pour "Notre Sélection"
+  promotionId String? // ID de promotion (relation à créer plus tard)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  categories    ProductCategory[] // Relation many-to-many avec les catégories
+  brands        ProductBrand[] // Relation many-to-many avec les marques
+  promotions    ProductPromotion[] // Relation many-to-many avec les promotions
+  featuredIn    FeaturedProduct[] // Produits mis en avant par le pharmacien
+  cartItems     CartItem[] // Relation avec les paniers
+  wishlistItems WishlistItem[] // Relation avec les listes de souhaits
+  orderItems    OrderItem[] // Relation avec les commandes
+  reviews       Review[] // Relation avec les avis clients
+
+  @@index([ean])
+  @@index([slug])
+  @@index([isActive])
+  @@index([isMedicament])
+  @@map("products")
+}
+
+// Modèle pour les images additionnelles des produits
+model ProductImage {
+  id        String  @id @default(cuid())
+  url       String // URL de l'image
+  alt       String? // Texte alternatif
+  position  Int     @default(0) // Ordre d'affichage
+  productId String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+  @@map("product_images")
+}
+
+// Table de liaison pour la relation many-to-many entre Product et Category
+model ProductCategory {
+  id         String @id @default(cuid())
+  productId  String
+  categoryId String // On stocke juste l'ID pour l'instant
+
+  // Relation avec Product
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Relation avec Category
+  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([productId, categoryId]) // Un produit ne peut être lié qu'une fois à une catégorie
+  @@index([categoryId])
+  @@map("product_categories")
+}
+
+// Modèle pour les catégories (Mega Menu)
+model Category {
+  id                 String    @id @default(cuid())
+  name               String
+  slug               String    @unique
+  description        String?   @db.Text
+  imageUrl           String? // Grande image pour le menu ou la page catégorie
+  thumbnailUrl       String? // Petite image / icône
+  position           Int       @default(0) // Ordre d'affichage dans "Nos Univers"
+  menuPosition       Int       @default(0) // Ordre d'affichage dans le Mega Menu
+  searchPosition     Int       @default(0) // Ordre d'affichage dans la barre de recherche
+  highlightColor     String? // Couleur de fond pour mise en avant (ex: #000000 pour Black Friday)
+  highlightTextColor String? // Couleur du texte pour mise en avant
+  isActive           Boolean   @default(true)
+  startDate          DateTime? // Date de début d'affichage (optionnel)
+  endDate            DateTime? // Date de fin d'affichage (optionnel)
+
+  // SEO
+  metaTitle       String?
+  metaDescription String? @db.Text
+
+  // Hiérarchie : Many-to-Many (une catégorie fille peut avoir plusieurs parents)
+  parents  Category[] @relation("CategoryHierarchy")
+  children Category[] @relation("CategoryHierarchy")
+
+  // Liens mis en avant dans le Mega Menu (JSON: [{ title, url, imageUrl }])
+  featuredLinks Json?
+
+  // Relation avec les produits
+  products ProductCategory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Brand {
+  id       String  @id @default(cuid())
+  name     String
+  slug     String  @unique
+  imageUrl String? // Logo de la marque
+  position Int     @default(0) // Ordre d'affichage
+  searchPosition Int @default(0) // Ordre d'affichage dans la barre de recherche
+  isActive Boolean @default(true)
+
+  // Relations
+  products ProductBrand[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([position])
+  @@map("brands")
+}
+
+// Table de liaison pour la relation many-to-many entre Product et Brand
+model ProductBrand {
+  id        String @id @default(cuid())
+  productId String
+  brandId   String
+
+  // Relation avec Product
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  // Relation avec Brand
+  brand Brand @relation(fields: [brandId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([productId, brandId]) // Un produit ne peut être lié qu'une fois à une marque
+  @@index([brandId])
+  @@map("product_brands")
+}
+
+// Modèle pour les bannières e-commerce du carousel
+model Banner {
+  id          String    @id @default(cuid())
+  title       String // Titre pour l'accessibilité
+  alt         String // Texte alternatif pour l'image
+  imageUrl    String // URL de l'image de la bannière
+  redirectUrl String? // URL de redirection au clic (optionnel)
+  position    Int       @default(0) // Ordre d'affichage
+  isActive    Boolean   @default(true) // Bannière active ou non
+  startDate   DateTime? // Date de début d'affichage (optionnel)
+  endDate     DateTime? // Date de fin d'affichage (optionnel)
+
+  // Personnalisation
+  text        String? // Texte à afficher (sur bouton ou non)
+  textColor   String? // Couleur du texte
+  showButton  Boolean @default(false) // Afficher sous forme de bouton
+  buttonColor String? // Couleur du bouton (si showButton est true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([position])
+  @@map("banners")
+}
+
+// Modèle pour les promotions/offres e-commerce
+model Promotion {
+  id          String        @id @default(cuid())
+  title       String // Titre de la promotion
+  imageUrl    String // Image de la promotion
+  amount      Decimal       @db.Decimal(10, 2) // Montant de la réduction
+  type        PromotionType // Type: EURO ou PERCENT
+  redirectUrl String // URL de redirection au clic
+  position    Int           @default(0) // Ordre d'affichage
+  isActive    Boolean       @default(true)
+  startDate   DateTime? // Date de début (optionnel)
+  endDate     DateTime? // Date de fin (optionnel)
+
+  // Personnalisation du bouton
+  buttonText      String? @default("JE FONCE") // Texte du bouton
+  buttonColor     String? // Couleur du bouton
+  buttonTextColor String? // Couleur du texte du bouton
+
+  // Relation avec les produits
+  products ProductPromotion[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([position])
+  @@map("promotions")
+}
+
+// Enum pour le type de promotion
+enum PromotionType {
+  EURO
+  PERCENT
+}
+
+// Table de liaison pour la relation many-to-many entre Product et Promotion
+model ProductPromotion {
+  id          String @id @default(cuid())
+  productId   String
+  promotionId String
+
+  // Relations
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  promotion Promotion @relation(fields: [promotionId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([productId, promotionId])
+  @@index([promotionId])
+  @@map("product_promotions")
+}
+
+// Modèle pour la sélection du pharmacien (produits mis en avant)
+model FeaturedProduct {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  position  Int     @default(0) // Ordre d'affichage
+  isActive  Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([productId]) // Un produit ne peut être featured qu'une seule fois
+  @@index([position])
+  @@map("featured_products")
+}
+
+// ============================================================================
+// USER ACCOUNT SYSTEM
+// ============================================================================
+
+// Modèle pour les utilisateurs clients (e-commerce)
+model User {
+  id String @id @default(cuid())
+
+  // Basic Info
+  email     String    @unique
+  password  String? // Nullable for OAuth users
+  firstName String
+  lastName  String
+  gender    Gender? // MALE, FEMALE, OTHER, PREFER_NOT_TO_SAY
+  birthDate DateTime? // For age calculation
+  phone     String?
+
+  // Account Status
+  emailVerified Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  role          UserRole @default(CUSTOMER) // CUSTOMER, ADMIN
+
+  // Preferences
+  newsletter Boolean @default(false)
+  language   String  @default("fr")
+
+  // Timestamps
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  lastLoginAt DateTime?
+
+  // Relations
+  addresses     Address[]
+  carts         Cart[]
+  orders        Order[]
+  wishlistItems WishlistItem[]
+  reviews       Review[]
+
+  @@index([email])
+  @@map("users")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+  PREFER_NOT_TO_SAY
+}
+
+enum UserRole {
+  CUSTOMER // Client e-commerce
+  ADMIN // Accès complet backoffice
+}
+
+// Modèle pour les adresses utilisateur
+model Address {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Address Details
+  firstName    String
+  lastName     String
+  company      String?
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  postalCode   String
+  country      String  @default("France")
+  phone        String
+
+  // Flags
+  isDefault  Boolean @default(false)
+  isBilling  Boolean @default(false)
+  isShipping Boolean @default(true)
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  ordersAsShipping Order[] @relation("ShippingAddress")
+  ordersAsBilling  Order[] @relation("BillingAddress")
+
+  @@index([userId])
+  @@map("addresses")
+}
+
+// Modèle pour la liste de souhaits
+model WishlistItem {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@map("wishlist_items")
+}
+
+// Modèle pour les commandes
+model Order {
+  id          String @id @default(cuid())
+  orderNumber String @unique
+
+  // User Info
+  userId     String?
+  user       User?   @relation(fields: [userId], references: [id])
+  guestEmail String? // For guest checkout
+
+  // Addresses
+  shippingAddressId String
+  shippingAddress   Address @relation("ShippingAddress", fields: [shippingAddressId], references: [id])
+  billingAddressId  String
+  billingAddress    Address @relation("BillingAddress", fields: [billingAddressId], references: [id])
+
+  // Order Details
+  status       OrderStatus @default(PENDING)
+  subtotal     Decimal     @db.Decimal(10, 2)
+  shippingCost Decimal     @db.Decimal(10, 2)
+  tax          Decimal     @db.Decimal(10, 2)
+  total        Decimal     @db.Decimal(10, 2)
+
+  // Payment
+  paymentMethod String?
+  paymentStatus PaymentStatus @default(PENDING)
+  paidAt        DateTime?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([orderNumber])
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity    Int
+  priceAtTime Decimal @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+// Modèle pour les avis clients
+model Review {
+  id        String  @id @default(cuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  rating   Int // 1-5
+  title    String?
+  comment  String? @db.Text
+  verified Boolean @default(false) // Verified purchase
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@index([productId])
+  @@map("reviews")
+}
+
+// Modèle pour le panier
+model Cart {
+  id           String  @id @default(cuid())
+  userId       String? // Optionnel : ID utilisateur si connecté
+  sessionToken String? // Optionnel : Token de session pour invité (cookie)
+
+  user  User?      @relation(fields: [userId], references: [id])
+  items CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([sessionToken])
+  @@map("carts")
+}
+
+// Modèle pour les articles du panier
+model CartItem {
+  id        String @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([cartId, productId]) // Un produit ne peut apparaître qu'une fois par panier
+  @@index([cartId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+// Modèle pour les méthodes de livraison
+model ShippingMethod {
+  id                  String         @id @default(cuid())
+  name                String
+  type                String         @unique // PHARMACY, HOME, RELAY
+  description         String?
+  isActive            Boolean        @default(true)
+  freeShippingThreshold Decimal?     @db.Decimal(10, 2) // Amount for free shipping (null if never free)
+  rates               ShippingRate[]
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+
+  @@map("shipping_methods")
+}
+
+// Modèle pour les tarifs de livraison par poids
+model ShippingRate {
+  id               String         @id @default(cuid())
+  shippingMethodId String
+  shippingMethod   ShippingMethod @relation(fields: [shippingMethodId], references: [id], onDelete: Cascade)
+  minWeight        Decimal        @db.Decimal(10, 3) // In kg
+  maxWeight        Decimal        @db.Decimal(10, 3) // In kg
+  price            Decimal        @db.Decimal(10, 2)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@map("shipping_rates")
+}
+
+// Modèle pour les liens des réseaux sociaux (Footer)
+model SocialLinks {
+  id        String   @id @default(cuid())
+  facebook  String?  // URL Facebook
+  instagram String?  // URL Instagram
+  twitter   String?  // URL Twitter (X)
+  linkedin  String?  // URL LinkedIn
+  tiktok    String?  // URL TikTok
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("social_links")
+}
