@@ -34,7 +34,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     where: { email: credentials.email as string },
                 })
 
-                if (!user || !user.isActive) {
+                if (!user || !user.isActive || !user.password) {
                     return null
                 }
 
@@ -50,7 +50,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 return {
                     id: user.id,
                     email: user.email,
-                    name: user.name,
+                    name: `${user.firstName} ${user.lastName}`,
                     role: user.role,
                 }
             },

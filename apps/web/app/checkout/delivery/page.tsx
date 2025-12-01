@@ -25,8 +25,6 @@ export default function CheckoutDeliveryPage() {
         postalCode: '',
         country: 'France',
         phone: user?.phone || '',
-        country: 'France',
-        phone: user?.phone || '',
     });
 
     const [acceptSamples, setAcceptSamples] = useState(false);
@@ -38,8 +36,8 @@ export default function CheckoutDeliveryPage() {
         }
     }, [user, guestEmail, router]);
 
-    const isAddressValid = formData.addressLine1 && formData.city && formData.postalCode && formData.firstName && formData.lastName;
-    const isContactValid = formData.firstName && formData.lastName && formData.phone;
+    const isAddressValid = !!(formData.addressLine1 && formData.city && formData.postalCode && formData.firstName && formData.lastName);
+    const isContactValid = !!(formData.firstName && formData.lastName && formData.phone);
 
     const handleAddressChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

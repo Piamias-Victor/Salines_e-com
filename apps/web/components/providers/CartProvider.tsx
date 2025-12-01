@@ -12,6 +12,8 @@ interface CartItem {
         imageUrl: string;
         slug: string;
         weight: number | null;
+        stock: number;
+        maxOrderQuantity?: number;
     };
 }
 

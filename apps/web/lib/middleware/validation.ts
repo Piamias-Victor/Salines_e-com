@@ -17,7 +17,7 @@ export async function validateRequest<T extends z.ZodType>(
                 response: errorResponse(
                     'Validation error',
                     400,
-                    error.errors
+                    error.issues
                 )
             };
         }

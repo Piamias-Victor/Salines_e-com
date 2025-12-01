@@ -23,8 +23,10 @@ export interface Category {
     position: number;
     menuPosition: number;
     highlightColor: string | null;
+    highlightTextColor: string | null;
     isActive: boolean;
     featuredLinks: any | null;
+    children?: Category[];
     createdAt: Date;
     updatedAt: Date;
 }
@@ -40,6 +42,8 @@ export interface Product {
     priceTTC: number;
     tva: number;
     stock: number;
+    weight: number | null;
+    maxOrderQuantity: number | null;
     isActive: boolean;
     position: number;
     promotionId: string | null;

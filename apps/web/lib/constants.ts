@@ -22,6 +22,7 @@ export const API_CONFIG = {
         PROMOTIONS: 10,
         FEATURED_CATEGORIES: 12,
         FEATURED_BRANDS: 10,
+        FEATURED_PRODUCTS: 20,
     },
 } as const;
 

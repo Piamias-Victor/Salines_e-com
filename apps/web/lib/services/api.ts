@@ -48,14 +48,15 @@ class ApiClient {
     }
 
     async get<T>(endpoint: string, options?: FetchOptions): Promise<T> {
-        const { limit, offset, ...fetchOptions } = options || {};
+        const { limit, offset, params: _, ...fetchOptions } = options || {};
+
+        const params: Record<string, number> = {};
+        if (limit !== undefined) params.limit = limit;
+        if (offset !== undefined) params.offset = offset;
 
         return this.request<T>(endpoint, {
             method: 'GET',
-            params: {
-                ...(limit !== undefined && { limit }),
-                ...(offset !== undefined && { offset }),
-            },
+            params,
             ...fetchOptions,
         });
     }

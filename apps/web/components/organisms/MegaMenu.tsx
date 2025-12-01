@@ -5,22 +5,12 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { categoriesService } from '@/lib/services';
+import type { Category } from '@/lib/types/models';
 
 interface FeaturedLink {
     title: string;
     url: string;
     imageUrl: string;
-}
-
-interface Category {
-    id: string;
-    name: string;
-    slug: string;
-    imageUrl: string | null;
-    highlightColor: string | null;
-    highlightTextColor: string | null;
-    children: Category[];
-    featuredLinks?: FeaturedLink[];
 }
 
 export function MegaMenu() {
@@ -96,7 +86,7 @@ export function MegaMenu() {
                                 } : undefined}
                             >
                                 {category.name}
-                                {category.children?.length > 0 && <ChevronDown size={12} />}
+                                {(category.children?.length ?? 0) > 0 && <ChevronDown size={12} />}
                             </Link>
                         </li>
                     ))}
@@ -146,7 +136,7 @@ export function MegaMenu() {
                                     </h3>
                                     <div className="grid grid-cols-3 gap-6">
                                         {/* Featured Links from JSON */}
-                                        {category.featuredLinks?.map((link, index) => (
+                                        {category.featuredLinks?.map((link: FeaturedLink, index: number) => (
                                             <Link
                                                 key={index}
                                                 href={link.url}

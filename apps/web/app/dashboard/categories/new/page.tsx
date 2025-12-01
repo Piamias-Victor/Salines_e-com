@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { CategoryForm } from '@/components/dashboard/CategoryForm';
 
 export default function NewCategoryPage() {
-    const [categories, setCategories] = useState([]);
+    const [categories, setCategories] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchCategories = async () => {
