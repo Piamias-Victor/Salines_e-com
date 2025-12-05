@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { hashPassword, comparePassword, validatePassword } from './password';
 import { generateTokens, type TokenPayload } from './jwt';
 import type { User } from '@prisma/client';
+import { mailService } from '@/lib/services/mail';
 
 export interface RegisterData {
     email: string;
@@ -56,6 +57,8 @@ export async function register(data: RegisterData): Promise<AuthResponse> {
     const hashedPassword = await hashPassword(data.password);
 
     // Create user
+    const verificationToken = crypto.randomUUID();
+
     const user = await prisma.user.create({
         data: {
             email: data.email.toLowerCase(),
@@ -66,8 +69,18 @@ export async function register(data: RegisterData): Promise<AuthResponse> {
             gender: data.gender,
             birthDate: data.birthDate,
             newsletter: data.newsletter || false,
+            verificationToken,
+            emailVerified: false,
         },
     });
+
+    // Send verification email
+    try {
+        await mailService.sendVerificationEmail(user.email, verificationToken, user.firstName);
+    } catch (error) {
+        console.error('Failed to send verification email:', error);
+        // Don't fail registration if email fails, user can request resend later
+    }
 
     // Generate tokens
     const tokens = generateTokens({

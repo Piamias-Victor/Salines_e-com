@@ -135,55 +135,71 @@ export function SearchDrawer({ isOpen, onClose }: SearchDrawerProps) {
 
                     {/* Default Content (Suggestions) */}
                     {showDefaults && (
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-                            {/* Brands First on Mobile */}
-                            <div className="lg:col-span-5 order-1 lg:order-2 mb-8 lg:mb-0">
-                                <h3 className="text-xl font-bold text-[#3f4c53] mb-6 flex items-center gap-2">
-                                    Marques à la une
-                                </h3>
-                                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-4">
-                                    {defaultBrands?.map((brand) => (
-                                        <Link
-                                            key={brand.id}
-                                            href={`/brand/${brand.slug}`}
-                                            onClick={onClose}
-                                            className="aspect-square relative bg-white rounded-xl border border-gray-100 hover:border-[#fe0090] shadow-sm hover:shadow-md transition-all flex items-center justify-center p-4 group"
-                                        >
-                                            <div className="relative w-full h-full">
-                                                <Image
-                                                    src={brand.imageUrl || '/placeholder.png'}
-                                                    alt={brand.name}
-                                                    fill
-                                                    className="object-contain transition-transform duration-300 group-hover:scale-110"
-                                                />
+                        <>
+                            {(defaultCategories.length > 0 || defaultBrands.length > 0) ? (
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+                                    {/* Brands First on Mobile */}
+                                    {defaultBrands.length > 0 && (
+                                        <div className="lg:col-span-5 order-1 lg:order-2 mb-8 lg:mb-0">
+                                            <h3 className="text-xl font-bold text-[#3f4c53] mb-6 flex items-center gap-2">
+                                                Marques à la une
+                                            </h3>
+                                            <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-3 gap-4">
+                                                {defaultBrands.map((brand) => (
+                                                    <Link
+                                                        key={brand.id}
+                                                        href={`/brand/${brand.slug}`}
+                                                        onClick={onClose}
+                                                        className="aspect-square relative bg-white rounded-xl border border-gray-100 hover:border-[#fe0090] shadow-sm hover:shadow-md transition-all flex items-center justify-center p-4 group"
+                                                    >
+                                                        <div className="relative w-full h-full">
+                                                            <Image
+                                                                src={brand.imageUrl || '/placeholder.png'}
+                                                                alt={brand.name}
+                                                                fill
+                                                                className="object-contain transition-transform duration-300 group-hover:scale-110"
+                                                            />
+                                                        </div>
+                                                    </Link>
+                                                ))}
                                             </div>
-                                        </Link>
-                                    ))}
-                                </div>
-                            </div>
+                                        </div>
+                                    )}
 
-                            {/* Categories */}
-                            <div className="lg:col-span-7 order-2 lg:order-1">
-                                <h3 className="text-xl font-bold text-[#3f4c53] mb-6 flex items-center gap-2">
-                                    Catégories populaires
-                                </h3>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    {defaultCategories?.map((category) => (
-                                        <Link
-                                            key={category.id}
-                                            href={`/category/${category.slug}`}
-                                            onClick={onClose}
-                                            className="flex items-center justify-between p-4 rounded-xl hover:bg-pink-50 group transition-colors border border-gray-100 hover:border-pink-100"
-                                        >
-                                            <span className="font-medium text-gray-700 group-hover:text-[#fe0090] transition-colors">
-                                                {category.name}
-                                            </span>
-                                            <ChevronRight size={16} className="text-gray-300 group-hover:text-[#fe0090] transition-colors" />
-                                        </Link>
-                                    ))}
+                                    {/* Categories */}
+                                    {defaultCategories.length > 0 && (
+                                        <div className={defaultBrands.length > 0 ? "lg:col-span-7 order-2 lg:order-1" : "lg:col-span-12"}>
+                                            <h3 className="text-xl font-bold text-[#3f4c53] mb-6 flex items-center gap-2">
+                                                Catégories populaires
+                                            </h3>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                {defaultCategories.map((category) => (
+                                                    <Link
+                                                        key={category.id}
+                                                        href={`/category/${category.slug}`}
+                                                        onClick={onClose}
+                                                        className="flex items-center justify-between p-4 rounded-xl hover:bg-pink-50 group transition-colors border border-gray-100 hover:border-pink-100"
+                                                    >
+                                                        <span className="font-medium text-gray-700 group-hover:text-[#fe0090] transition-colors">
+                                                            {category.name}
+                                                        </span>
+                                                        <ChevronRight size={16} className="text-gray-300 group-hover:text-[#fe0090] transition-colors" />
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        </div>
+                            ) : (
+                                <div className="text-center py-12">
+                                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <Search className="text-gray-400" size={32} />
+                                    </div>
+                                    <h3 className="text-lg font-medium text-gray-900 mb-2">Commencez votre recherche</h3>
+                                    <p className="text-gray-500">Tapez un mot-clé pour rechercher des produits, marques ou catégories</p>
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {/* Search Results Content Grid */}

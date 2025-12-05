@@ -103,6 +103,9 @@ export const cartService = {
                     sessionToken: !userId ? sessionToken : undefined,
                 },
             });
+            console.log('[CART SERVICE] New cart created:', { id: cart.id, userId, sessionToken });
+        } else {
+            console.log('[CART SERVICE] Using existing cart:', { id: cart.id, userId, sessionToken });
         }
 
         // 3. Add or Update Item

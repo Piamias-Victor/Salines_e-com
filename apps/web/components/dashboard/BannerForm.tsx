@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, ArrowLeft, ImageIcon, Type, Link as LinkIcon, Calendar } from 'lucide-react';
+import { Save, ArrowLeft, ImageIcon, Type, Link as LinkIcon, Calendar, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { FormSection, FormField, Card, Checkbox } from '@/components/ui';
 
 interface BannerFormProps {
     initialData?: any;
@@ -29,9 +30,7 @@ export function BannerForm({ initialData }: BannerFormProps) {
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const url = initialData
-                ? `/api/banners/${initialData.id}`
-                : '/api/banners';
+            const url = initialData ? `/api/banners/${initialData.id}` : '/api/banners';
             const method = initialData ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -55,28 +54,15 @@ export function BannerForm({ initialData }: BannerFormProps) {
         }
     };
 
-    const SectionHeader = ({ icon: Icon, title, description }: any) => (
-        <div className="bg-gradient-to-r from-[#fe0090]/5 to-transparent p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#fe0090]/10 rounded-lg">
-                    <Icon className="text-[#fe0090]" size={20} />
-                </div>
-                <div>
-                    <h3 className="font-semibold text-gray-900">{title}</h3>
-                    <p className="text-sm text-gray-500">{description}</p>
-                </div>
-            </div>
-        </div>
-    );
+    const handleFieldChange = (field: string, value: string | boolean) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
 
     return (
         <div className="max-w-4xl mx-auto pb-20">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
-                    <Link
-                        href="/dashboard/banners"
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
+                    <Link href="/dashboard/banners" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                         <ArrowLeft size={20} />
                     </Link>
                     <div>
@@ -89,242 +75,156 @@ export function BannerForm({ initialData }: BannerFormProps) {
                     </div>
                 </div>
 
-                <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#fe0090] text-white rounded-lg hover:bg-[#fe0090]/90 transition-colors shadow-lg shadow-pink-500/20 disabled:opacity-50"
-                >
-                    <Save size={20} />
-                    {loading ? 'Enregistrement...' : 'Enregistrer'}
+                <button onClick={handleSubmit} disabled={loading} className="flex items-center gap-2 px-6 py-3 bg-[#fe0090] text-white rounded-lg hover:bg-[#fe0090]/90 transition-colors shadow-lg shadow-pink-500/20 disabled:opacity-50">
+                    {loading ? (<><Loader2 size={20} className="animate-spin" />Enregistrement...</>) : (<><Save size={20} />Enregistrer</>)}
                 </button>
             </div>
 
             <div className="space-y-6">
-                {/* General Info */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <SectionHeader
-                        icon={Type}
-                        title="Informations générales"
-                        description="Titre et texte alternatif"
-                    />
-                    <div className="p-6 space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Titre (Accessibilité) *
-                            </label>
+                <FormSection icon={Type} title="Informations générales" description="Titre et texte alternatif">
+                    <div className="space-y-4">
+                        <FormField label="Titre (Accessibilité)" name="title" required>
                             <input
                                 type="text"
                                 value={formData.title}
-                                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                                onChange={(e) => handleFieldChange('title', e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
                                 placeholder="Ex: Promo d'été"
                             />
-                        </div>
+                        </FormField>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Texte alternatif (SEO) *
-                            </label>
+                        <FormField label="Texte alternatif (SEO)" name="alt" required>
                             <input
                                 type="text"
                                 value={formData.alt}
-                                onChange={(e) => setFormData(prev => ({ ...prev, alt: e.target.value }))}
+                                onChange={(e) => handleFieldChange('alt', e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
                                 placeholder="Ex: Bannière promotionnelle pour les produits solaires"
                             />
-                        </div>
+                        </FormField>
                     </div>
-                </div>
+                </FormSection>
 
-                {/* Customization */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <SectionHeader
-                        icon={Type}
-                        title="Personnalisation"
-                        description="Texte et bouton"
-                    />
-                    <div className="p-6 space-y-6">
+                <FormSection icon={Type} title="Personnalisation" description="Texte et bouton">
+                    <div className="space-y-6">
                         <div className="grid grid-cols-2 gap-6">
                             <div className="col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Texte affiché
-                                </label>
-                                <input
-                                    type="text"
-                                    value={formData.text}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, text: e.target.value }))}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
-                                    placeholder="Ex: Découvrez nos promotions"
-                                />
+                                <FormField label="Texte affiché" name="text">
+                                    <input
+                                        type="text"
+                                        value={formData.text}
+                                        onChange={(e) => handleFieldChange('text', e.target.value)}
+                                        className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
+                                        placeholder="Ex: Découvrez nos promotions"
+                                    />
+                                </FormField>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Couleur du texte
-                                </label>
+                            <FormField label="Couleur du texte" name="textColor">
                                 <div className="flex items-center gap-3">
                                     <input
                                         type="color"
                                         value={formData.textColor}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, textColor: e.target.value }))}
+                                        onChange={(e) => handleFieldChange('textColor', e.target.value)}
                                         className="h-10 w-20 p-1 rounded border border-gray-200 cursor-pointer"
                                     />
                                     <span className="text-sm text-gray-500 font-mono">{formData.textColor}</span>
                                 </div>
-                            </div>
+                            </FormField>
                         </div>
 
                         <div className="border-t border-gray-100 pt-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700">
-                                        Afficher un bouton
-                                    </label>
-                                    <p className="text-xs text-gray-500">
-                                        Ajouter un bouton d'action sur la bannière
-                                    </p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setFormData(prev => ({ ...prev, showButton: !prev.showButton }))}
-                                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.showButton ? 'bg-[#fe0090]' : 'bg-gray-200'
-                                        }`}
-                                >
-                                    <span
-                                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.showButton ? 'translate-x-6' : 'translate-x-1'
-                                            }`}
-                                    />
-                                </button>
-                            </div>
+                            <Checkbox
+                                checked={formData.showButton}
+                                onChange={(e) => handleFieldChange('showButton', e.target.checked)}
+                                label="Afficher un bouton"
+                            />
+                            <p className="text-xs text-gray-500 mt-1 ml-6">Ajouter un bouton d'action sur la bannière</p>
 
                             {formData.showButton && (
-                                <div className="grid grid-cols-2 gap-6 bg-gray-50 p-4 rounded-xl">
-                                    <div className="col-span-2">
-                                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                                            Couleur du bouton
-                                        </label>
+                                <div className="mt-4 bg-gray-50 p-4 rounded-xl">
+                                    <FormField label="Couleur du bouton" name="buttonColor">
                                         <div className="flex items-center gap-3">
                                             <input
                                                 type="color"
                                                 value={formData.buttonColor}
-                                                onChange={(e) => setFormData(prev => ({ ...prev, buttonColor: e.target.value }))}
+                                                onChange={(e) => handleFieldChange('buttonColor', e.target.value)}
                                                 className="h-10 w-20 p-1 rounded border border-gray-200 cursor-pointer"
                                             />
                                             <span className="text-sm text-gray-500 font-mono">{formData.buttonColor}</span>
                                         </div>
-                                    </div>
+                                    </FormField>
                                 </div>
                             )}
                         </div>
                     </div>
-                </div>
+                </FormSection>
 
-                {/* Visuals */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <SectionHeader
-                        icon={ImageIcon}
-                        title="Visuel"
-                        description="Image de la bannière"
-                    />
-                    <div className="p-6 space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                URL de l'image *
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.imageUrl}
-                                onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
-                                placeholder="https://..."
-                            />
-                        </div>
-                    </div>
-                </div>
+                <FormSection icon={ImageIcon} title="Visuel" description="Image de la bannière">
+                    <FormField label="URL de l'image" name="imageUrl" required>
+                        <input
+                            type="text"
+                            value={formData.imageUrl}
+                            onChange={(e) => handleFieldChange('imageUrl', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
+                            placeholder="https://..."
+                        />
+                    </FormField>
+                </FormSection>
 
-                {/* Navigation */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <SectionHeader
-                        icon={LinkIcon}
-                        title="Navigation"
-                        description="Lien de redirection"
-                    />
-                    <div className="p-6 space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                URL de redirection (Optionnel)
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.redirectUrl}
-                                onChange={(e) => setFormData(prev => ({ ...prev, redirectUrl: e.target.value }))}
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
-                                placeholder="https://... ou /categories/..."
-                            />
-                        </div>
-                    </div>
-                </div>
+                <FormSection icon={LinkIcon} title="Navigation" description="Lien de redirection">
+                    <FormField label="URL de redirection (Optionnel)" name="redirectUrl">
+                        <input
+                            type="text"
+                            value={formData.redirectUrl}
+                            onChange={(e) => handleFieldChange('redirectUrl', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
+                            placeholder="https://... ou /categories/..."
+                        />
+                    </FormField>
+                </FormSection>
 
-                {/* Scheduling */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <SectionHeader
-                        icon={Calendar}
-                        title="Planification"
-                        description="Période d'affichage"
-                    />
-                    <div className="p-6 grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Date de début
-                            </label>
+                <FormSection icon={Calendar} title="Planification" description="Période d'affichage">
+                    <div className="grid grid-cols-2 gap-4">
+                        <FormField label="Date de début" name="startDate">
                             <input
                                 type="date"
                                 value={formData.startDate}
-                                onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
+                                onChange={(e) => handleFieldChange('startDate', e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
                             />
-                        </div>
+                        </FormField>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Date de fin
-                            </label>
+                        <FormField label="Date de fin" name="endDate">
                             <input
                                 type="date"
                                 value={formData.endDate}
-                                onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
+                                onChange={(e) => handleFieldChange('endDate', e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
                             />
-                        </div>
+                        </FormField>
                     </div>
-                </div>
+                </FormSection>
 
-                {/* Settings */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="p-6 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Bannière active
-                                </label>
-                                <p className="text-xs text-gray-500">
-                                    Afficher cette bannière sur le site
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
-                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? 'bg-[#fe0090]' : 'bg-gray-200'
-                                    }`}
-                            >
-                                <span
-                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isActive ? 'translate-x-6' : 'translate-x-1'
-                                        }`}
-                                />
-                            </button>
+                <Card>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Bannière active
+                            </label>
+                            <p className="text-xs text-gray-500">
+                                Afficher cette bannière sur le site
+                            </p>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => handleFieldChange('isActive', !formData.isActive)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? 'bg-[#fe0090]' : 'bg-gray-200'}`}
+                        >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                        </button>
                     </div>
-                </div>
+                </Card>
             </div>
         </div>
     );

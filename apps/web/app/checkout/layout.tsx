@@ -13,6 +13,11 @@ const steps = [
 function CheckoutSteps() {
     const pathname = usePathname();
 
+    // Hide steps on success page
+    if (pathname.includes('/checkout/success')) {
+        return null;
+    }
+
     // Determine current step based on path
     const currentStepIndex = steps.findIndex(step => pathname.includes(step.path));
     const currentStepId = currentStepIndex !== -1 ? steps[currentStepIndex].id : 1;

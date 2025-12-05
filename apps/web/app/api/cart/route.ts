@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { cartService, CART_COOKIE_NAME } from '@/lib/services/cart';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
     try {
@@ -53,6 +54,50 @@ export async function POST(req: Request) {
         return NextResponse.json(cartItem);
     } catch (error: any) {
         console.error('[CART_POST]', error);
+        return NextResponse.json({ error: error.message || 'Internal Error' }, { status: 500 });
+    }
+}
+
+export async function PATCH(req: Request) {
+    try {
+        const body = await req.json();
+        const { shippingMethodId } = body;
+
+        // Handle Session Cookie
+        const cookieStore = await cookies();
+        const sessionToken = cookieStore.get(CART_COOKIE_NAME)?.value;
+
+        // TODO: Get real user ID
+        const userId = undefined;
+
+        if (!sessionToken && !userId) {
+            return NextResponse.json({ error: 'No active cart' }, { status: 404 });
+        }
+
+        const cart = await cartService.getCart(userId);
+
+        if (!cart) {
+            return NextResponse.json({ error: 'Cart not found' }, { status: 404 });
+        }
+
+        // Update cart
+        const updatedCart = await prisma.cart.update({
+            where: { id: cart.id },
+            data: {
+                shippingMethodId: shippingMethodId,
+            },
+            include: {
+                items: {
+                    include: {
+                        product: true,
+                    },
+                },
+            },
+        });
+
+        return NextResponse.json(updatedCart);
+    } catch (error: any) {
+        console.error('[CART_PATCH]', error);
         return NextResponse.json({ error: error.message || 'Internal Error' }, { status: 500 });
     }
 }

@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { Save, ArrowLeft, Upload, Type, Image as ImageIcon, Package } from 'lucide-react';
+import { Save, ArrowLeft, Type, Image as ImageIcon, Package, Loader2 } from 'lucide-react';
 import Link from 'next/link';
+import { FormSection, FormField, Card } from '@/components/ui';
 import { ProductPicker } from './ProductPicker';
 
 interface BrandFormProps {
@@ -23,20 +23,14 @@ export function BrandForm({ initialData }: BrandFormProps) {
     });
 
     const generateSlug = (name: string) => {
-        return name
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/(^-|-$)/g, '');
+        return name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     };
 
     const handleSubmit = async () => {
         setLoading(true);
         try {
-            const url = initialData
-                ? `/api/brands/${initialData.id}`
-                : '/api/brands';
+            const url = initialData ? `/api/brands/${initialData.id}` : '/api/brands';
             const method = initialData ? 'PUT' : 'POST';
 
             const res = await fetch(url, {
@@ -60,28 +54,19 @@ export function BrandForm({ initialData }: BrandFormProps) {
         }
     };
 
-    const SectionHeader = ({ icon: Icon, title, description }: any) => (
-        <div className="bg-gradient-to-r from-[#fe0090]/5 to-transparent p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#fe0090]/10 rounded-lg">
-                    <Icon className="text-[#fe0090]" size={20} />
-                </div>
-                <div>
-                    <h3 className="font-semibold text-gray-900">{title}</h3>
-                    <p className="text-sm text-gray-500">{description}</p>
-                </div>
-            </div>
-        </div>
-    );
+    const handleFieldChange = (field: string, value: string | boolean) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleNameChange = (name: string) => {
+        setFormData(prev => ({ ...prev, name, slug: generateSlug(name) }));
+    };
 
     return (
         <div className="max-w-4xl mx-auto pb-20">
             <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-4">
-                    <Link
-                        href="/dashboard/brands"
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
+                    <Link href="/dashboard/brands" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                         <ArrowLeft size={20} />
                     </Link>
                     <div>
@@ -94,124 +79,78 @@ export function BrandForm({ initialData }: BrandFormProps) {
                     </div>
                 </div>
 
-                <button
-                    onClick={handleSubmit}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-6 py-3 bg-[#fe0090] text-white rounded-lg hover:bg-[#fe0090]/90 transition-colors shadow-lg shadow-pink-500/20 disabled:opacity-50"
-                >
-                    <Save size={20} />
-                    {loading ? 'Enregistrement...' : 'Enregistrer'}
+                <button onClick={handleSubmit} disabled={loading} className="flex items-center gap-2 px-6 py-3 bg-[#fe0090] text-white rounded-lg hover:bg-[#fe0090]/90 transition-colors shadow-lg shadow-pink-500/20 disabled:opacity-50">
+                    {loading ? (<><Loader2 size={20} className="animate-spin" />Enregistrement...</>) : (<><Save size={20} />Enregistrer</>)}
                 </button>
             </div>
 
             <div className="space-y-6">
-                {/* General Info */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <SectionHeader
-                        icon={Type}
-                        title="Informations générales"
-                        description="Nom et description de la marque"
-                    />
-                    <div className="p-6 space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Nom de la marque *
-                            </label>
+                <FormSection icon={Type} title="Informations générales" description="Nom et description de la marque">
+                    <div className="space-y-4">
+                        <FormField label="Nom de la marque" name="name" required>
                             <input
                                 type="text"
                                 value={formData.name}
-                                onChange={(e) => {
-                                    const name = e.target.value;
-                                    setFormData(prev => ({
-                                        ...prev,
-                                        name,
-                                        slug: generateSlug(name)
-                                    }));
-                                }}
+                                onChange={(e) => handleNameChange(e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
                                 placeholder="Ex: L'Oréal"
                             />
-                        </div>
+                        </FormField>
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Slug (URL)
-                            </label>
+                        <FormField label="Slug (URL)" name="slug">
                             <input
                                 type="text"
                                 value={formData.slug}
-                                onChange={(e) => setFormData(prev => ({ ...prev, slug: e.target.value }))}
+                                onChange={(e) => handleFieldChange('slug', e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090] font-mono text-sm"
                                 placeholder="loreal"
                             />
-                        </div>
+                        </FormField>
                     </div>
-                </div>
+                </FormSection>
 
-                {/* Visuals */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <SectionHeader
-                        icon={ImageIcon}
-                        title="Visuels"
-                        description="Image/Logo de la marque"
-                    />
-                    <div className="p-6 space-y-4">
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-2">
-                                URL de l'image/logo
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.imageUrl || ''}
-                                onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
-                                placeholder="https://..."
+                <FormSection icon={ImageIcon} title="Visuels" description="Image/Logo de la marque">
+                    <FormField label="URL de l'image/logo" name="imageUrl">
+                        <input
+                            type="text"
+                            value={formData.imageUrl || ''}
+                            onChange={(e) => handleFieldChange('imageUrl', e.target.value)}
+                            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090]"
+                            placeholder="https://..."
+                        />
+                    </FormField>
+                </FormSection>
+
+                <Card className="overflow-hidden">
+                    <FormSection icon={Package} title="Produits associés" description="Sélectionnez les produits de cette marque">
+                        <div className="p-6">
+                            <ProductPicker
+                                selectedProductIds={formData.productIds}
+                                onChange={(ids) => handleFieldChange('productIds', ids as any)}
                             />
                         </div>
-                    </div>
-                </div>
+                    </FormSection>
+                </Card>
 
-                {/* Products */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <SectionHeader
-                        icon={Package}
-                        title="Produits associés"
-                        description="Sélectionnez les produits de cette marque"
-                    />
-                    <div className="p-6">
-                        <ProductPicker
-                            selectedProductIds={formData.productIds}
-                            onChange={(ids) => setFormData(prev => ({ ...prev, productIds: ids }))}
-                        />
-                    </div>
-                </div>
-
-                {/* Settings */}
-                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="p-6 space-y-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700">
-                                    Marque active
-                                </label>
-                                <p className="text-xs text-gray-500">
-                                    Afficher cette marque sur le site
-                                </p>
-                            </div>
-                            <button
-                                type="button"
-                                onClick={() => setFormData(prev => ({ ...prev, isActive: !prev.isActive }))}
-                                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? 'bg-[#fe0090]' : 'bg-gray-200'
-                                    }`}
-                            >
-                                <span
-                                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isActive ? 'translate-x-6' : 'translate-x-1'
-                                        }`}
-                                />
-                            </button>
+                <Card>
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">
+                                Marque active
+                            </label>
+                            <p className="text-xs text-gray-500">
+                                Afficher cette marque sur le site
+                            </p>
                         </div>
+                        <button
+                            type="button"
+                            onClick={() => handleFieldChange('isActive', !formData.isActive)}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${formData.isActive ? 'bg-[#fe0090]' : 'bg-gray-200'}`}
+                        >
+                            <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${formData.isActive ? 'translate-x-6' : 'translate-x-1'}`} />
+                        </button>
                     </div>
-                </div>
+                </Card>
             </div>
         </div>
     );

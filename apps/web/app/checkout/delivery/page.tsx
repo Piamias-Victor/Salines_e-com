@@ -44,7 +44,9 @@ export default function CheckoutDeliveryPage() {
         setFormData((prev) => ({ ...prev, [name]: value }));
     }, []);
 
-    const handleSubmit = useCallback((e: React.FormEvent) => {
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const handleSubmit = useCallback(async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!deliveryMode) return;
@@ -62,13 +64,35 @@ export default function CheckoutDeliveryPage() {
             }
         }
 
-        setShippingAddress(formData);
-        if (isSameAddress) {
-            setBillingAddress(formData);
-        }
+        setIsSubmitting(true);
 
-        router.push('/checkout/payment');
-    }, [deliveryMode, isContactValid, isAddressValid, setShippingAddress, setBillingAddress, isSameAddress, formData, router]);
+        try {
+            // Find selected shipping method ID
+            const selectedMethod = shippingMethods.find(m => m.type === deliveryMode);
+
+            if (selectedMethod) {
+                // Update cart with shipping method
+                await fetch('/api/cart', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ shippingMethodId: selectedMethod.id }),
+                });
+            }
+
+            setShippingAddress(formData);
+            if (isSameAddress) {
+                setBillingAddress(formData);
+            }
+
+            router.push('/checkout/payment');
+        } catch (error) {
+            console.error('Error updating cart:', error);
+            // Continue anyway, maybe show a warning? For now just proceed
+            router.push('/checkout/payment');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }, [deliveryMode, isContactValid, isAddressValid, setShippingAddress, setBillingAddress, isSameAddress, formData, router, shippingMethods]);
 
     return (
         <div className="max-w-7xl mx-auto">
@@ -115,11 +139,17 @@ export default function CheckoutDeliveryPage() {
 
                     <button
                         type="submit"
-                        disabled={!deliveryMode || !isAddressValid}
+                        disabled={!deliveryMode || !isAddressValid || isSubmitting}
                         className="w-full bg-[#fe0090] text-white font-bold py-4 rounded-xl hover:bg-[#d4007a] transition-all duration-300 shadow-lg shadow-pink-500/30 hover:shadow-pink-500/50 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
                     >
-                        <span>Continuer vers le paiement</span>
-                        <ArrowRight size={20} />
+                        {isSubmitting ? (
+                            <span>Chargement...</span>
+                        ) : (
+                            <>
+                                <span>Continuer vers le paiement</span>
+                                <ArrowRight size={20} />
+                            </>
+                        )}
                     </button>
                 </div>
             </form>

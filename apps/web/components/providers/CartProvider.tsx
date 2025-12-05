@@ -34,6 +34,7 @@ interface CartContextType {
     updateQuantity: (itemId: string, quantity: number) => Promise<void>;
     removeItem: (itemId: string) => Promise<void>;
     refreshCart: () => Promise<void>;
+    clearCart: () => Promise<void>;
     getTotalWeight: () => number;
     getTotalPrice: () => number;
 }
@@ -125,6 +126,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const clearCart = async () => {
+        try {
+            if (!cart) return;
+
+            // Delete all items
+            await Promise.all(
+                cart.items.map(item =>
+                    fetch(`/api/cart/${item.id}`, { method: 'DELETE' })
+                )
+            );
+
+            await fetchCart();
+        } catch (error) {
+            console.error('Clear cart error', error);
+            throw error;
+        }
+    };
+
     const getTotalWeight = () => {
         if (!cart) return 0;
         return cart.items.reduce((total, item) => {
@@ -154,6 +173,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 updateQuantity,
                 removeItem,
                 refreshCart: fetchCart,
+                clearCart,
                 getTotalWeight,
                 getTotalPrice,
             }}

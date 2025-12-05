@@ -48,11 +48,16 @@ class ApiClient {
     }
 
     async get<T>(endpoint: string, options?: FetchOptions): Promise<T> {
-        const { limit, offset, params: _, ...fetchOptions } = options || {};
+        const { limit, offset, params: customParams, ...fetchOptions } = options || {};
 
-        const params: Record<string, number> = {};
+        const params: Record<string, string | number> = {};
         if (limit !== undefined) params.limit = limit;
         if (offset !== undefined) params.offset = offset;
+
+        // Merge custom params (like visible: 'true')
+        if (customParams) {
+            Object.assign(params, customParams);
+        }
 
         return this.request<T>(endpoint, {
             method: 'GET',
