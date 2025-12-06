@@ -126,6 +126,21 @@ export const AddressForm = memo(function AddressForm({ formData, onChange }: Add
                                 />
                             </div>
                         </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Pays *</label>
+                            <select
+                                name="country"
+                                value={formData.country}
+                                onChange={(e) => onChange(e as any)}
+                                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-[#fe0090] transition-colors bg-white"
+                            >
+                                <option value="France">France</option>
+                                <option value="Belgique">Belgique</option>
+                                <option value="Suisse">Suisse</option>
+                                <option value="Luxembourg">Luxembourg</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
             </div>

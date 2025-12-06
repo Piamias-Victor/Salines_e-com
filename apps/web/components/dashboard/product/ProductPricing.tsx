@@ -39,10 +39,10 @@ export function ProductPricing({ formData, onChange, onPriceChange }: ProductPri
                     onChange={(e) => onChange('tva', e.target.value)}
                     fullWidth
                 >
-                    <option value="20">20% (Standard)</option>
-                    <option value="10">10% (Intermédiaire)</option>
-                    <option value="5.5">5.5% (Réduit)</option>
-                    <option value="2.1">2.1% (Super réduit)</option>
+                    <option value="20">20%</option>
+                    <option value="10">10%</option>
+                    <option value="5.5">5.5%</option>
+                    <option value="2.1">2.1%</option>
                 </Select>
             </FormField>
 

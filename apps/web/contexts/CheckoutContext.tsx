@@ -16,6 +16,8 @@ export interface Address {
     postalCode: string;
     country: string;
     phone: string;
+    id?: string;
+    isDefault?: boolean;
 }
 
 interface CheckoutContextType {

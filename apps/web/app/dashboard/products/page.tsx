@@ -1,14 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useProducts } from "@/hooks/useProducts";
 import { ProductsTable } from "@/components/dashboard/products/ProductsTable";
 
 export default function ProductsPage() {
-    const { products, loading, deleteProduct } = useProducts();
+    const [page, setPage] = useState(1);
     const [searchQuery, setSearchQuery] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
+
+    // Debounce search
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setDebouncedSearch(searchQuery);
+            setPage(1); // Reset to first page on new search
+        }, 500);
+
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    const { products, loading, totalPages, deleteProduct } = useProducts({
+        page,
+        limit: 20,
+        search: debouncedSearch
+    });
 
     const handleDelete = async (id: string, name: string) => {
         if (!confirm(`Êtes-vous sûr de vouloir supprimer "${name}" ?`)) {
@@ -21,13 +38,6 @@ export default function ProductsPage() {
         }
     };
 
-    const filteredProducts = searchQuery
-        ? products.filter((p) =>
-            p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            p.ean.toLowerCase().includes(searchQuery.toLowerCase())
-        )
-        : products;
-
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -35,7 +45,7 @@ export default function ProductsPage() {
                 <div>
                     <h1 className="text-2xl font-bold text-[#3f4c53]">Produits</h1>
                     <p className="text-gray-500">
-                        Gérez votre catalogue de produits ({products.length})
+                        Gérez votre catalogue de produits
                     </p>
                 </div>
                 <Link
@@ -66,10 +76,33 @@ export default function ProductsPage() {
 
             {/* Products Table */}
             <ProductsTable
-                products={filteredProducts}
+                products={products}
                 loading={loading}
                 onDelete={handleDelete}
             />
+
+            {/* Pagination */}
+            {!loading && totalPages > 1 && (
+                <div className="flex justify-center items-center gap-4 mt-6">
+                    <button
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        disabled={page === 1}
+                        className="px-4 py-2 border border-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-50"
+                    >
+                        Précédent
+                    </button>
+                    <span className="text-sm text-gray-600">
+                        Page {page} sur {totalPages}
+                    </span>
+                    <button
+                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        disabled={page === totalPages}
+                        className="px-4 py-2 border border-gray-200 rounded-lg disabled:opacity-50 hover:bg-gray-50"
+                    >
+                        Suivant
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

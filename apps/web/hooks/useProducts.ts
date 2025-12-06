@@ -10,16 +10,41 @@ interface Product {
     isActive: boolean;
 }
 
-export function useProducts() {
+export function useProducts({
+    page = 1,
+    limit = 20,
+    search = ""
+}: {
+    page?: number;
+    limit?: number;
+    search?: string;
+} = {}) {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
+    const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
 
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const response = await fetch("/api/products?admin=true");
+            const params = new URLSearchParams({
+                admin: "true",
+                page: page.toString(),
+                limit: limit.toString(),
+            });
+
+            if (search) {
+                params.append("search", search);
+            }
+
+            const response = await fetch(`/api/products?${params.toString()}`);
             const data = await response.json();
-            setProducts(data.data || data);
+
+            setProducts(data.data || []);
+            if (data.pagination) {
+                setTotal(data.pagination.total);
+                setTotalPages(data.pagination.totalPages);
+            }
         } catch (error) {
             console.error("Error fetching products:", error);
         } finally {
@@ -29,7 +54,7 @@ export function useProducts() {
 
     useEffect(() => {
         fetchProducts();
-    }, []);
+    }, [page, limit, search]);
 
     const deleteProduct = async (id: string) => {
         try {
@@ -41,7 +66,8 @@ export function useProducts() {
                 throw new Error("Failed to delete product");
             }
 
-            setProducts(products.filter((p) => p.id !== id));
+            // Refresh the list to maintain correct pagination
+            fetchProducts();
             return true;
         } catch (error) {
             console.error("Error deleting product:", error);
@@ -52,6 +78,8 @@ export function useProducts() {
     return {
         products,
         loading,
+        total,
+        totalPages,
         fetchProducts,
         deleteProduct,
     };

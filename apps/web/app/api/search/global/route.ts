@@ -87,7 +87,9 @@ export async function GET(request: Request) {
             return NextResponse.json({ brands, categories, products });
         } catch (error: any) {
             // Fallback to regular case-insensitive search if unaccent is not available
-            if (error.code === '42883') {
+            // Fallback to regular case-insensitive search if unaccent is not available
+            // P2010 is raw query failed, 42883 is undefined function
+            if (error.code === '42883' || (error.code === 'P2010' && error.message?.includes('42883'))) {
                 console.warn('unaccent extension not available, falling back to regular ILIKE');
 
                 const [brands, categories, products] = await Promise.all([

@@ -62,13 +62,7 @@ export default function AccountPage() {
             href: '/account/addresses',
             color: 'bg-purple-50 text-purple-600',
         },
-        {
-            icon: Settings,
-            title: 'Paramètres',
-            description: 'Préférences et sécurité',
-            href: '/account/settings',
-            color: 'bg-gray-50 text-gray-600',
-        },
+
     ];
 
     return (

@@ -344,13 +344,14 @@ export default function CartPage() {
                             <p className="text-xs text-gray-500">Total</p>
                             <p className="text-2xl font-bold text-[#fe0090]">{formatPrice(total)}</p>
                         </div>
-                        <button
-                            disabled={hasStockIssues}
-                            className="flex-1 ml-4 bg-[#fe0090] text-white font-bold text-base py-4 px-6 rounded-xl hover:bg-[#d4007a] transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-pink-500/30 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none"
+                        <Link
+                            href="/checkout/login"
+                            className={`flex-1 ml-4 bg-[#fe0090] text-white font-bold text-base py-4 px-6 rounded-xl hover:bg-[#d4007a] transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-pink-500/30 active:scale-95 ${hasStockIssues ? 'opacity-50 cursor-not-allowed pointer-events-none shadow-none' : ''}`}
+                            aria-disabled={hasStockIssues}
                         >
                             <span>Payer ma commande</span>
                             <ArrowRight size={20} />
-                        </button>
+                        </Link>
                     </div>
                 </div>
             </div>

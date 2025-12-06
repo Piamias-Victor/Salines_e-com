@@ -29,7 +29,7 @@ const navigation = [
     { name: 'Bannières', href: '/dashboard/banners', icon: ImageIcon },
     { name: 'Vitrine', href: '/dashboard/showcase', icon: Eye },
     { name: 'Commandes', href: '/dashboard/orders', icon: ShoppingBag },
-    { name: 'Utilisateurs', href: '/dashboard/users', icon: Users },
+    { name: 'Clients', href: '/dashboard/users', icon: Users },
     { name: 'Paramètres', href: '/dashboard/settings/delivery', icon: Settings },
 ];
 
