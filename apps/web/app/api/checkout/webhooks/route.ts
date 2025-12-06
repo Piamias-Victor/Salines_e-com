@@ -68,7 +68,7 @@ export async function POST(req: Request) {
 }
 
 async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
-    const { cartId, userId, subtotal, shippingCost, total } = paymentIntent.metadata;
+    const { cartId, userId, subtotal, shippingCost, total, promoCode: promoCodeValue, promoDiscount } = paymentIntent.metadata;
 
     if (!cartId) {
         console.error('No cartId in payment intent metadata');
@@ -92,6 +92,23 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
         return;
     }
 
+    // Find promo code if used
+    let promoCodeId = null;
+    if (promoCodeValue) {
+        const promoCode = await prisma.promoCode.findUnique({
+            where: { code: promoCodeValue },
+        });
+        if (promoCode) {
+            promoCodeId = promoCode.id;
+
+            // Increment usage count
+            await prisma.promoCode.update({
+                where: { id: promoCode.id },
+                data: { usageCount: { increment: 1 } },
+            });
+        }
+    }
+
     // Generate unique order number
     const orderNumber = `ORD-${Date.now()}-${Math.random().toString(36).substring(2, 9).toUpperCase()}`;
 
@@ -112,6 +129,12 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
             total: Number(total),
             stripePaymentIntentId: paymentIntent.id,
             stripeChargeId: paymentIntent.latest_charge as string,
+
+            // Promo Code
+            promoCodeId,
+            promoCodeValue: promoCodeValue || null,
+            promoCodeDiscount: promoDiscount ? Number(promoDiscount) : null,
+
             // Addresses will be added later when checkout flow is complete
             shippingAddressId: undefined as any,
             billingAddressId: undefined as any,
@@ -119,7 +142,9 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
                 create: cart.items.map((item) => ({
                     productId: item.productId,
                     quantity: item.quantity,
-                    price: item.product.priceTTC,
+                    price: item.appliedPromotionPrice || item.product.priceTTC,
+                    appliedPromotionId: item.appliedPromotionId,
+                    appliedPromotionPrice: item.appliedPromotionPrice,
                 })),
             },
         },
@@ -128,6 +153,13 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
     // Clear cart
     await prisma.cartItem.deleteMany({
         where: { cartId },
+    });
+
+    // Also clear the applied promo code from the cart (though cart items are gone, the cart might persist or be deleted)
+    // If we delete the cart items, the cart itself remains. We should probably clear the appliedPromoCode too.
+    await prisma.cart.update({
+        where: { id: cartId },
+        data: { appliedPromoCode: null },
     });
 
     console.log('Order created successfully:', order.orderNumber);

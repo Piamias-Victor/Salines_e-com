@@ -119,6 +119,10 @@ export async function GET(request: NextRequest) {
                             brandId: true,
                         },
                     },
+                    promotions: {
+                        include: { promotion: true },
+                        where: { promotion: { isActive: true } },
+                    },
                 },
                 skip,
                 take: limit,

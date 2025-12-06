@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { getActivePromotion, calculatePromotionPrice, isPromotionExpired } from '@/lib/utils/promotion';
 
 export const CART_COOKIE_NAME = 'cart_session';
 
@@ -48,11 +49,14 @@ export const cartService = {
                                 priceTTC: true,
                                 imageUrl: true,
                                 weight: true,
-                            }
-                        }
+                                stock: true,
+                                maxOrderQuantity: true,
+                            },
+                        },
+                        appliedPromotion: true,
                     },
-                    orderBy: { createdAt: 'desc' }
-                }
+                    orderBy: { createdAt: 'desc' },
+                },
             }
         });
     },
@@ -69,17 +73,27 @@ export const cartService = {
             throw new Error('No session found');
         }
 
-        // 1. Get Product to check stock
+        // 1. Get Product to check stock and promotions
         const product = await prisma.product.findUnique({
             where: { id: productId },
+            include: {
+                promotions: {
+                    include: { promotion: true },
+                    where: { promotion: { isActive: true } },
+                },
+            },
         });
 
         if (!product) throw new Error('Product not found');
 
         // Check stock
         if (product.stock < quantity) {
-            throw new Error(`Not enough stock. Available: ${product.stock}`);
+            throw new Error('Insufficient stock');
         }
+
+        // Calculate promotion price
+        const activePromotion = getActivePromotion(product as any);
+        const priceCalc = calculatePromotionPrice(Number(product.priceTTC), activePromotion);
 
         // Check max order quantity
         if (product.maxOrderQuantity && quantity > product.maxOrderQuantity) {
@@ -131,7 +145,11 @@ export const cartService = {
 
             return prisma.cartItem.update({
                 where: { id: existingItem.id },
-                data: { quantity: newQuantity },
+                data: {
+                    quantity: newQuantity,
+                    appliedPromotionId: activePromotion?.id,
+                    appliedPromotionPrice: priceCalc.hasPromotion ? priceCalc.finalPrice : null,
+                },
             });
         } else {
             return prisma.cartItem.create({
@@ -139,6 +157,8 @@ export const cartService = {
                     cartId: cart.id,
                     productId,
                     quantity,
+                    appliedPromotionId: activePromotion?.id,
+                    appliedPromotionPrice: priceCalc.hasPromotion ? priceCalc.finalPrice : null,
                 },
             });
         }
@@ -180,5 +200,38 @@ export const cartService = {
         return prisma.cartItem.delete({
             where: { id: itemId },
         });
-    }
+    },
+
+    /**
+     * Clean expired promotions from cart
+     * This should be called when loading the cart to ensure promotions are still valid
+     */
+    async cleanExpiredPromotions(cartId: string) {
+        const items = await prisma.cartItem.findMany({
+            where: { cartId },
+            include: { appliedPromotion: true },
+        });
+
+        const updates = [];
+
+        for (const item of items) {
+            if (item.appliedPromotion && isPromotionExpired(item.appliedPromotion)) {
+                updates.push(
+                    prisma.cartItem.update({
+                        where: { id: item.id },
+                        data: {
+                            appliedPromotionId: null,
+                            appliedPromotionPrice: null,
+                        },
+                    })
+                );
+            }
+        }
+
+        if (updates.length > 0) {
+            await prisma.$transaction(updates);
+        }
+
+        return updates.length;
+    },
 };

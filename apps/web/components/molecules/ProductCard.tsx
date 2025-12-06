@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { formatPrice, calculateDiscountPercentage } from '@/lib/utils';
 import type { Product } from '@/lib/types';
 import { useCart } from '@/hooks/useCart';
+import { getActivePromotion, calculatePromotionPrice, formatPromotionBadge } from '@/lib/utils/promotion';
 
 // ============================================================================
 // Product Card Component
@@ -14,10 +15,9 @@ import { useCart } from '@/hooks/useCart';
 
 interface ProductCardProps {
     product: Product;
-    promoPrice?: number;
 }
 
-export function ProductCard({ product, promoPrice }: ProductCardProps) {
+export function ProductCard({ product }: ProductCardProps) {
     const [isLiked, setIsLiked] = useState(false);
     const { addToCart, isAdding, cart } = useCart();
     const [localIsAdding, setLocalIsAdding] = useState(false);
@@ -25,10 +25,12 @@ export function ProductCard({ product, promoPrice }: ProductCardProps) {
     // Get brand name from product brands (first brand if multiple)
     const brand = (product as any).brands?.[0]?.brand?.name || null;
 
-    // Calculate discount percentage if promo price exists
-    const discountPercentage = promoPrice
-        ? calculateDiscountPercentage(Number(product.priceTTC), promoPrice)
-        : 0;
+    // Calculate promotion
+    const activePromotion = getActivePromotion(product as any);
+    const priceCalc = calculatePromotionPrice(Number(product.priceTTC), activePromotion);
+    const hasPromotion = priceCalc.hasPromotion;
+    const finalPrice = priceCalc.finalPrice;
+    const originalPrice = priceCalc.originalPrice;
 
     // Calculate limits
     const cartItem = cart?.items.find(item => item.productId === product.id);
@@ -67,10 +69,10 @@ export function ProductCard({ product, promoPrice }: ProductCardProps) {
                         className="object-cover transition-transform duration-500 group-hover:scale-105 p-2"
                     />
 
-                    {/* Promo Badge - Larger on mobile */}
-                    {promoPrice && (
-                        <div className="absolute top-3 right-3 bg-[#fe0090] text-white font-bold px-3 py-1.5 rounded-lg text-sm shadow-lg z-10">
-                            -{discountPercentage}%
+                    {/* Promo Badge */}
+                    {hasPromotion && activePromotion && (
+                        <div className="absolute top-3 right-3 bg-[#fe0090] text-white font-bold px-4 py-2 rounded-lg text-base md:text-sm shadow-lg z-10">
+                            {formatPromotionBadge(activePromotion)}
                         </div>
                     )}
 
@@ -106,13 +108,13 @@ export function ProductCard({ product, promoPrice }: ProductCardProps) {
 
                     {/* Price - More prominent */}
                     <div className="flex items-baseline gap-2 mb-1">
-                        {promoPrice ? (
+                        {hasPromotion ? (
                             <>
                                 <span className="text-2xl md:text-xl font-bold text-[#fe0090]">
-                                    {formatPrice(promoPrice)}
+                                    {formatPrice(finalPrice)}
                                 </span>
                                 <span className="text-sm text-gray-400 line-through">
-                                    {formatPrice(Number(product.priceTTC))}
+                                    {formatPrice(originalPrice)}
                                 </span>
                             </>
                         ) : (

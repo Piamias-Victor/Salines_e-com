@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ShoppingCart, Plus, Minus, Heart, Loader2 } from 'lucide-react';
 import { formatPrice } from '@/lib/utils';
+import { getActivePromotion, calculatePromotionPrice, formatPromotionBadge } from '@/lib/utils/promotion';
 import { ReassuranceBar } from './ReassuranceBar';
 import { useCart } from '@/hooks/useCart';
 
@@ -12,6 +13,7 @@ interface AddToCartSectionProps {
         priceTTC: number;
         stock: number;
         maxOrderQuantity?: number | null;
+        promotions?: any[]; // Add promotions
     };
     unitPrice?: string | null;
 }
@@ -19,6 +21,13 @@ interface AddToCartSectionProps {
 export function AddToCartSection({ product, unitPrice }: AddToCartSectionProps) {
     const [quantity, setQuantity] = useState(1);
     const { addToCart, isAdding, cart } = useCart();
+
+    // Calculate promotion
+    const activePromotion = getActivePromotion(product as any);
+    const priceCalc = calculatePromotionPrice(Number(product.priceTTC), activePromotion);
+    const hasPromotion = priceCalc.hasPromotion;
+    const finalPrice = priceCalc.finalPrice;
+    const originalPrice = priceCalc.originalPrice;
     const [error, setError] = useState<string | null>(null);
 
     // Calculate current quantity in cart for this product
@@ -69,10 +78,22 @@ export function AddToCartSection({ product, unitPrice }: AddToCartSectionProps) 
             <div className="space-y-6 md:space-y-8 pb-32 md:pb-0">
                 {/* Price Block */}
                 <div>
+                    {/* Promotion Badge */}
+                    {hasPromotion && activePromotion && (
+                        <div className="inline-block bg-[#fe0090] text-white font-bold px-4 py-2 rounded-lg text-base mb-3 shadow-lg">
+                            {formatPromotionBadge(activePromotion)}
+                        </div>
+                    )}
+
                     <div className="flex items-baseline gap-4">
                         <span className="text-4xl md:text-5xl font-bold text-[#fe0090] tracking-tight">
-                            {formatPrice(Number(product.priceTTC))}
+                            {formatPrice(hasPromotion ? finalPrice : Number(product.priceTTC))}
                         </span>
+                        {hasPromotion && (
+                            <span className="text-2xl text-gray-400 line-through">
+                                {formatPrice(originalPrice)}
+                            </span>
+                        )}
                     </div>
                     {unitPrice && (
                         <p className="text-sm text-gray-500 mt-1">
@@ -215,11 +236,23 @@ export function AddToCartSection({ product, unitPrice }: AddToCartSectionProps) 
 
                     {/* Price + Add to Cart Button */}
                     <div className="flex items-center gap-3">
-                        <div className="flex flex-col">
-                            <span className="text-xs text-gray-500">Prix</span>
-                            <span className="text-2xl font-bold text-[#fe0090]">
-                                {formatPrice(Number(product.priceTTC) * quantity)}
-                            </span>
+                        {/* Price */}
+                        <div className="flex-1">
+                            {hasPromotion && activePromotion && (
+                                <div className="inline-block bg-[#fe0090] text-white font-bold px-2 py-1 rounded text-xs mb-1">
+                                    {formatPromotionBadge(activePromotion)}
+                                </div>
+                            )}
+                            <div className="flex items-baseline gap-2">
+                                <p className="text-2xl font-bold text-[#fe0090]">
+                                    {formatPrice(hasPromotion ? finalPrice : Number(product.priceTTC))}
+                                </p>
+                                {hasPromotion && (
+                                    <p className="text-sm text-gray-400 line-through">
+                                        {formatPrice(originalPrice)}
+                                    </p>
+                                )}
+                            </div>
                         </div>
                         <button
                             onClick={handleAddToCart}

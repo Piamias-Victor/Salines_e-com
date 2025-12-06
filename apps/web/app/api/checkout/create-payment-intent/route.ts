@@ -33,14 +33,55 @@ export async function POST(request: Request) {
             );
         }
 
-        // Calculate subtotal
+        // Calculate subtotal using applied promotion prices
         const subtotal = cart.items.reduce((sum, item) => {
-            return sum + Number(item.product.priceTTC) * item.quantity;
+            // Use applied promotion price if exists, otherwise use regular price
+            const price = item.appliedPromotionPrice
+                ? Number(item.appliedPromotionPrice)
+                : Number(item.product.priceTTC);
+            return sum + (price * item.quantity);
         }, 0);
+
+        // Calculate Promo Code Discount
+        let promoDiscount = 0;
+        let promoCode = null;
+        if (cart.appliedPromoCode) {
+            promoCode = await prisma.promoCode.findUnique({
+                where: { code: cart.appliedPromoCode },
+            });
+
+            if (promoCode && promoCode.isActive) {
+                // Verify validity (dates, limits) - simplified here as it should be validated on apply
+                // But good to double check dates
+                const now = new Date();
+                if ((!promoCode.startDate || promoCode.startDate <= now) &&
+                    (!promoCode.endDate || promoCode.endDate >= now)) {
+
+                    if (promoCode.discountType === 'PERCENTAGE') {
+                        promoDiscount = (subtotal * Number(promoCode.discountAmount)) / 100;
+                    } else {
+                        promoDiscount = Number(promoCode.discountAmount);
+                    }
+                }
+            }
+        }
+
+        const subtotalAfterDiscount = Math.max(0, subtotal - promoDiscount);
 
         // Calculate shipping cost
         let shippingCost = 0;
-        if (cart.shippingMethodId) {
+
+        // Check for free shipping from promo code
+        let isFreeShippingViaCode = promoCode?.freeShipping;
+
+        // If restricted to a specific method, verify it matches
+        if (isFreeShippingViaCode && promoCode?.freeShippingMethodId) {
+            if (cart.shippingMethodId !== promoCode.freeShippingMethodId) {
+                isFreeShippingViaCode = false;
+            }
+        }
+
+        if (cart.shippingMethodId && !isFreeShippingViaCode) {
             const totalWeight = cart.items.reduce((sum, item) => {
                 return sum + (Number(item.product.weight) || 0) * item.quantity;
             }, 0);
@@ -57,16 +98,16 @@ export async function POST(request: Request) {
             });
 
             if (shippingRate) {
-                // Check if free shipping threshold is met
+                // Check if free shipping threshold is met (using subtotal after discount)
                 const freeShippingThreshold = shippingRate.shippingMethod.freeShippingThreshold;
-                if (!freeShippingThreshold || subtotal < Number(freeShippingThreshold)) {
+                if (!freeShippingThreshold || subtotalAfterDiscount < Number(freeShippingThreshold)) {
                     shippingCost = Number(shippingRate.price);
                 }
             }
         }
 
         // Calculate total
-        const total = subtotal + shippingCost;
+        const total = subtotalAfterDiscount + shippingCost;
 
         // Create Payment Intent
         const paymentIntent = await stripe.paymentIntents.create({
@@ -80,6 +121,8 @@ export async function POST(request: Request) {
                 cartId,
                 userId: userId || 'guest',
                 subtotal: subtotal.toFixed(2),
+                promoDiscount: promoDiscount.toFixed(2),
+                promoCode: promoCode?.code || null,
                 shippingCost: shippingCost.toFixed(2),
                 total: total.toFixed(2),
             },

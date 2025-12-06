@@ -1,21 +1,44 @@
 'use client';
 
-import { X, Minus, Plus, Trash2, ShoppingBag, Truck, ArrowRight, AlertTriangle } from 'lucide-react';
+import { X, Minus, Plus, Trash2, ShoppingBag, Truck, ArrowRight, AlertTriangle, Tag } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 import { formatPrice } from '@/lib/utils';
+import { formatPromotionBadge } from '@/lib/utils/promotion';
 import Image from 'next/image';
 import Link from 'next/link';
+import { PromoCodeInput } from '@/components/molecules/PromoCodeInput';
 
 export function CartDrawer() {
     const { cart, isCartOpen, closeCart, updateQuantity, removeItem, isLoading } = useCart();
 
-    // Remove the conditional return to allow animations
-    // if (!isCartOpen) return null; 
+    // Calculate totals with promotion prices
+    const subtotal = cart?.items.reduce((acc, item) => {
+        const price = item.appliedPromotionPrice ? item.appliedPromotionPrice : item.product.priceTTC;
+        return acc + (price * item.quantity);
+    }, 0) || 0;
 
-    const total = cart?.items.reduce((acc, item) => acc + (item.product.priceTTC * item.quantity), 0) || 0;
+    const originalTotal = cart?.items.reduce((acc, item) => acc + (item.product.priceTTC * item.quantity), 0) || 0;
+    const productSavings = originalTotal - subtotal;
+
+    let total = subtotal;
+    let promoDiscount = 0;
+
+    if (cart?.promoCode) {
+        if (cart.promoCode.discountType === 'PERCENTAGE') {
+            promoDiscount = (subtotal * cart.promoCode.discountAmount) / 100;
+        } else {
+            promoDiscount = Number(cart.promoCode.discountAmount);
+        }
+        total = Math.max(0, subtotal - promoDiscount);
+    }
+
+    const totalSavings = productSavings + promoDiscount;
+
     const freeShippingThreshold = 60;
-    const remainingForFreeShipping = Math.max(0, freeShippingThreshold - total);
-    const shippingProgress = Math.min(100, (total / freeShippingThreshold) * 100);
+    // Si livraison offerte par code promo, le seuil est atteint
+    const isFreeShippingViaCode = cart?.promoCode?.freeShipping;
+    const remainingForFreeShipping = isFreeShippingViaCode ? 0 : Math.max(0, freeShippingThreshold - total);
+    const shippingProgress = isFreeShippingViaCode ? 100 : Math.min(100, (total / freeShippingThreshold) * 100);
 
     // Check for stock issues
     const hasStockIssues = cart?.items.some(item => item.quantity > item.product.stock);
@@ -115,6 +138,13 @@ export function CartDrawer() {
                                                 <ShoppingBag size={24} />
                                             </div>
                                         )}
+
+                                        {/* Promotion Badge */}
+                                        {item.appliedPromotion && (
+                                            <div className="absolute top-1 right-1 bg-[#fe0090] text-white font-bold px-1.5 py-0.5 rounded text-[10px] shadow-lg">
+                                                {formatPromotionBadge(item.appliedPromotion)}
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Info */}
@@ -182,13 +212,26 @@ export function CartDrawer() {
                                                 </div>
 
                                                 <div className="text-right">
-                                                    <p className="text-[#fe0090] font-bold text-lg">
-                                                        {formatPrice(Number(item.product.priceTTC) * item.quantity)}
-                                                    </p>
-                                                    {item.quantity > 1 && (
-                                                        <p className="text-xs text-gray-400 hidden md:block">
-                                                            {formatPrice(Number(item.product.priceTTC))} / unité
-                                                        </p>
+                                                    {item.appliedPromotionPrice ? (
+                                                        <>
+                                                            <p className="text-[#fe0090] font-bold text-lg">
+                                                                {formatPrice(item.appliedPromotionPrice * item.quantity)}
+                                                            </p>
+                                                            <p className="text-xs text-gray-400 line-through">
+                                                                {formatPrice(item.product.priceTTC * item.quantity)}
+                                                            </p>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <p className="text-[#fe0090] font-bold text-lg">
+                                                                {formatPrice(Number(item.product.priceTTC) * item.quantity)}
+                                                            </p>
+                                                            {item.quantity > 1 && (
+                                                                <p className="text-xs text-gray-400 hidden md:block">
+                                                                    {formatPrice(Number(item.product.priceTTC))} / unité
+                                                                </p>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                             </div>
@@ -203,17 +246,44 @@ export function CartDrawer() {
                 {/* Footer */}
                 {cart?.items.length ? (
                     <div className="p-4 md:p-6 border-t border-gray-100 bg-white shadow-[0_-4px_20px_rgba(0,0,0,0.05)] z-10 pb-8 md:pb-6">
+
+                        <div className="mb-6">
+                            <PromoCodeInput />
+                        </div>
+
                         <div className="space-y-3 mb-4 md:mb-6">
                             <div className="flex items-center justify-between text-gray-500">
                                 <span>Sous-total</span>
-                                <span>{formatPrice(total)}</span>
+                                <span>{formatPrice(subtotal)}</span>
                             </div>
+
+                            {cart?.promoCode && (
+                                <div className="flex items-center justify-between text-emerald-600 text-sm">
+                                    <span className="font-medium flex items-center gap-1">
+                                        <Tag size={14} /> Code promo
+                                    </span>
+                                    <span className="font-bold">-{formatPrice(promoDiscount)}</span>
+                                </div>
+                            )}
+
+                            {totalSavings > 0 && (
+                                <div className="flex items-center justify-between text-pink-500 text-sm">
+                                    <span className="font-medium">🎉 Économies totales</span>
+                                    <span className="font-bold">-{formatPrice(totalSavings)}</span>
+                                </div>
+                            )}
+
                             <div className="flex items-center justify-between text-gray-500">
                                 <span>Livraison</span>
                                 {remainingForFreeShipping > 0 ? (
                                     <span>Calculé à l'étape suivante</span>
                                 ) : (
-                                    <span className="text-emerald-600 font-medium">Offerte</span>
+                                    <div className="text-right">
+                                        <span className="text-emerald-600 font-medium">Offerte</span>
+                                        {cart?.promoCode?.freeShippingMethodId && (
+                                            <p className="text-xs text-gray-500">(selon mode de livraison)</p>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                             <div className="flex items-center justify-between text-xl font-bold text-[#3f4c53] pt-3 border-t border-gray-100">
@@ -240,7 +310,7 @@ export function CartDrawer() {
                                 </button>
                             ) : (
                                 <Link
-                                    href="/checkout/login"
+                                    href="/cart"
                                     onClick={closeCart}
                                     className="w-full bg-[#fe0090] text-white font-bold py-3.5 md:py-4 rounded-xl hover:bg-[#d4007a] transition-all duration-300 shadow-lg shadow-pink-500/20 hover:shadow-pink-500/40 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-2 group"
                                 >

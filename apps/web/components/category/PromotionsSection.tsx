@@ -49,7 +49,6 @@ export function PromotionsSection({ products }: PromotionsSectionProps) {
                     renderItem={(product) => (
                         <ProductCard
                             product={product as any}
-                            promoPrice={product.promotions && product.promotions.length > 0 ? calculatePromoPrice(product) : undefined}
                         />
                     )}
                     emptyMessage="Aucune promotion active"
@@ -67,16 +66,4 @@ export function PromotionsSection({ products }: PromotionsSectionProps) {
             )}
         </div>
     );
-}
-
-function calculatePromoPrice(product: Product): number {
-    if (!product.promotions || product.promotions.length === 0) return Number(product.priceTTC);
-
-    const promotion = product.promotions[0].promotion;
-    const price = Number(product.priceTTC);
-
-    if (promotion.discountType === 'PERCENTAGE') {
-        return price * (1 - promotion.discountValue / 100);
-    }
-    return price - promotion.discountValue;
 }

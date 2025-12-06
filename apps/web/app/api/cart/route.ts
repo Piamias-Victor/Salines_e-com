@@ -8,7 +8,46 @@ export async function GET() {
         // TODO: Get real user ID from auth session
         const userId = undefined;
         const cart = await cartService.getCart(userId);
-        return NextResponse.json(cart || { items: [] });
+
+        if (!cart) {
+            return NextResponse.json({ items: [] });
+        }
+
+        // Clean expired promotions
+        await cartService.cleanExpiredPromotions(cart.id);
+
+        let promoCodeDetails = null;
+        if (cart.appliedPromoCode) {
+            promoCodeDetails = await prisma.promoCode.findUnique({
+                where: { code: cart.appliedPromoCode },
+            });
+        }
+
+        // Serialize Decimal fields for JSON response
+        const serializedCart = {
+            ...cart,
+            items: cart.items.map(item => ({
+                ...item,
+                product: {
+                    ...item.product,
+                    priceTTC: Number(item.product.priceTTC),
+                    weight: item.product.weight ? Number(item.product.weight) : null,
+                },
+                appliedPromotionPrice: item.appliedPromotionPrice ? Number(item.appliedPromotionPrice) : null,
+                appliedPromotion: item.appliedPromotion ? {
+                    ...item.appliedPromotion,
+                    amount: Number(item.appliedPromotion.amount),
+                } : null,
+            })),
+            promoCode: promoCodeDetails ? {
+                ...promoCodeDetails,
+                discountAmount: Number(promoCodeDetails.discountAmount),
+                minCartAmount: promoCodeDetails.minCartAmount ? Number(promoCodeDetails.minCartAmount) : null,
+                freeShippingMethodId: promoCodeDetails.freeShippingMethodId,
+            } : null,
+        };
+
+        return NextResponse.json(serializedCart);
     } catch (error) {
         console.error('[CART_GET]', error);
         return NextResponse.json({ error: 'Internal Error' }, { status: 500 });

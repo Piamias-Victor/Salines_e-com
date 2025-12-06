@@ -7,6 +7,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { PaymentForm } from '@/components/checkout/PaymentForm';
 import { Loader2, ShoppingBag, Truck } from 'lucide-react';
 import { useCartContext } from '@/components/providers/CartProvider';
+import { formatPrice } from '@/lib/utils';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useCheckout } from '@/contexts/CheckoutContext';
@@ -158,9 +159,22 @@ export default function CheckoutPaymentPage() {
                                             </p>
                                             <p className="text-xs text-gray-500">Qté: {item.quantity}</p>
                                         </div>
-                                        <p className="text-sm font-semibold text-gray-900">
-                                            {(Number(item.product.priceTTC) * item.quantity).toFixed(2)} €
-                                        </p>
+                                        <div className="text-right">
+                                            {item.appliedPromotionPrice ? (
+                                                <>
+                                                    <p className="text-sm font-semibold text-[#fe0090]">
+                                                        {formatPrice(item.appliedPromotionPrice * item.quantity)}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400 line-through">
+                                                        {formatPrice(item.product.priceTTC * item.quantity)}
+                                                    </p>
+                                                </>
+                                            ) : (
+                                                <p className="text-sm font-semibold text-gray-900">
+                                                    {formatPrice(Number(item.product.priceTTC) * item.quantity)}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
@@ -169,8 +183,20 @@ export default function CheckoutPaymentPage() {
                             <div className="space-y-2 mb-4 pb-4 border-b border-gray-200">
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600">Sous-total</span>
-                                    <span className="font-medium text-gray-900">{amount.toFixed(2)} €</span>
+                                    <span className="font-medium text-gray-900">{formatPrice(amount)}</span>
                                 </div>
+
+                                {(() => {
+                                    const originalTotal = cart?.items.reduce((acc, item) => acc + (Number(item.product.priceTTC) * item.quantity), 0) || 0;
+                                    const savings = originalTotal - amount;
+                                    return savings > 0 ? (
+                                        <div className="flex justify-between text-sm text-emerald-600">
+                                            <span className="font-medium">🎉 Économies</span>
+                                            <span className="font-bold">-{formatPrice(savings)}</span>
+                                        </div>
+                                    ) : null;
+                                })()}
+
                                 <div className="flex justify-between text-sm">
                                     <span className="text-gray-600 flex items-center gap-1">
                                         <Truck size={14} />
@@ -183,7 +209,7 @@ export default function CheckoutPaymentPage() {
                             {/* Total */}
                             <div className="flex justify-between items-center">
                                 <span className="text-lg font-bold text-gray-900">Total</span>
-                                <span className="text-2xl font-bold text-[#fe0090]">{amount.toFixed(2)} €</span>
+                                <span className="text-2xl font-bold text-[#fe0090]">{formatPrice(amount)}</span>
                             </div>
                         </div>
                     </div>

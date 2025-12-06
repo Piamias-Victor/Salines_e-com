@@ -232,6 +232,10 @@ model Promotion {
 
   // Relation avec les produits
   products ProductPromotion[]
+  
+  // Relation avec les paniers et commandes (tracking des promotions appliquées)
+  cartItems  CartItem[]  @relation("CartItemPromotions")
+  orderItems OrderItem[] @relation("OrderItemPromotions")
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -260,9 +264,61 @@ model ProductPromotion {
   createdAt DateTime @default(now())
 
   @@unique([productId, promotionId])
+  @@index([productId])
   @@index([promotionId])
   @@map("product_promotions")
 }
+
+// ============================================================================
+// PROMO CODES SYSTEM
+// ============================================================================
+
+// Modèle pour les codes promo (réductions appliquées au panier)
+model PromoCode {
+  id          String  @id @default(cuid())
+  code        String  @unique // Code unique (ex: "NOEL2024")
+  description String? // Description interne
+
+  // Type de réduction
+  discountType   DiscountType // EURO ou PERCENTAGE
+  discountAmount Decimal      @db.Decimal(10, 2)
+
+  // Conditions d'application
+  minCartAmount Decimal? @db.Decimal(10, 2) // Montant minimum panier
+  freeShipping  Boolean  @default(false) // Livraison gratuite
+  freeShippingMethodId String? // ID du mode de livraison offert (null = tous)
+  freeShippingMethod   ShippingMethod? @relation(fields: [freeShippingMethodId], references: [id])
+
+  // Limites d'utilisation
+  usageLimit   Int? // Nombre max d'utilisations (null = illimité)
+  usageCount   Int  @default(0) // Compteur d'utilisations
+  perUserLimit Int? // Max par utilisateur (null = illimité)
+
+  // Validité
+  isActive  Boolean   @default(true)
+  startDate DateTime? // Date de début
+  endDate   DateTime? // Date de fin
+
+  // Relations
+  orders Order[] // Commandes utilisant ce code
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([code])
+  @@index([isActive])
+  @@map("promo_codes")
+}
+
+// Enum pour le type de réduction des codes promo
+enum DiscountType {
+  EURO
+  PERCENTAGE
+}
+
+// ============================================================================
+// FEATURED PRODUCTS
+// ============================================================================
 
 // Modèle pour la sélection du pharmacien (produits mis en avant)
 model FeaturedProduct {
@@ -407,6 +463,12 @@ model Order {
   tax          Decimal     @db.Decimal(10, 2)
   total        Decimal     @db.Decimal(10, 2)
 
+  // Promo Code
+  promoCodeId       String?   // ID du code promo utilisé
+  promoCode         PromoCode? @relation(fields: [promoCodeId], references: [id])
+  promoCodeDiscount Decimal?   @db.Decimal(10, 2) // Montant de la réduction
+  promoCodeValue    String?    // Code utilisé (pour historique)
+
   // Payment
   paymentMethod String?
   paymentStatus PaymentStatus @default(PENDING)
@@ -446,23 +508,30 @@ enum PaymentStatus {
 }
 
 model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product @relation(fields: [productId], references: [id])
+    id        String  @id @default(cuid())
+    orderId   String
+    productId String
+    quantity  Int
+    price     Decimal @db.Decimal(10, 2) // Price at time of order
+    
+    // Item-level status for partial fulfillment
+    status    OrderItemStatus @default(PENDING)
 
-  quantity  Int
-  price     Decimal @db.Decimal(10, 2) // Price at time of order
-  
-  // Item-level status for partial fulfillment
-  status    OrderItemStatus @default(PENDING)
+    // Applied promotion tracking
+    appliedPromotionId    String?
+    appliedPromotionPrice Decimal? @db.Decimal(10, 2)
 
-  createdAt DateTime @default(now())
+    createdAt DateTime @default(now())
 
-  @@index([orderId])
-  @@index([productId])
-  @@map("order_items")
+    // Relations
+    order            Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    product          Product   @relation(fields: [productId], references: [id])
+    appliedPromotion Promotion? @relation("OrderItemPromotions", fields: [appliedPromotionId], references: [id], onDelete: SetNull)
+
+    @@index([orderId])
+    @@index([productId])
+    @@index([appliedPromotionId])
+    @@map("order_items")
 }
 
 enum OrderItemStatus {
@@ -507,6 +576,9 @@ model Cart {
   shippingMethodId String?
   shippingMethod   ShippingMethod? @relation(fields: [shippingMethodId], references: [id])
 
+  // Promo Code
+  appliedPromoCode String? // Code promo appliqué au panier
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -517,21 +589,26 @@ model Cart {
 
 // Modèle pour les articles du panier
 model CartItem {
-  id        String @id @default(cuid())
-  cartId    String
-  productId String
-  quantity  Int
+    id        String   @id @default(cuid())
+    cartId    String
+    productId String
+    quantity  Int      @default(1)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 
-  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+    // Applied promotion tracking
+    appliedPromotionId    String?
+    appliedPromotionPrice Decimal? @db.Decimal(10, 2)
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+    // Relations
+    cart             Cart      @relation(fields: [cartId], references: [id], onDelete: Cascade)
+    product          Product   @relation(fields: [productId], references: [id])
+    appliedPromotion Promotion? @relation("CartItemPromotions", fields: [appliedPromotionId], references: [id], onDelete: SetNull)
 
-  @@unique([cartId, productId]) // Un produit ne peut apparaître qu'une fois par panier
-  @@index([cartId])
-  @@index([productId])
-  @@map("cart_items")
+    @@unique([cartId, productId])
+    @@index([productId])
+    @@index([appliedPromotionId])
+    @@map("cart_items")
 }
 
 // Modèle pour les méthodes de livraison
@@ -544,6 +621,7 @@ model ShippingMethod {
   freeShippingThreshold Decimal?     @db.Decimal(10, 2) // Amount for free shipping (null if never free)
   rates               ShippingRate[]
   carts               Cart[]
+  promoCodes          PromoCode[] // Codes promo offrant ce mode de livraison
   createdAt           DateTime       @default(now())
   updatedAt           DateTime       @updatedAt
 

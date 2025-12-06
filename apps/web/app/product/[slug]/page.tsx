@@ -77,6 +77,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                                 priceTTC: Number(product.priceTTC),
                                 stock: product.stock,
                                 maxOrderQuantity: product.maxOrderQuantity,
+                                promotions: product.promotions,
                             }}
                             unitPrice={unitPrice}
                         />

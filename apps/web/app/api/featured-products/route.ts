@@ -20,6 +20,10 @@ export async function GET() {
                                 brand: true,
                             },
                         },
+                        promotions: {
+                            include: { promotion: true },
+                            where: { promotion: { isActive: true } },
+                        },
                     },
                 },
             },

@@ -26,6 +26,10 @@ export const getProductBySlug = cache(async (slug: string) => {
                     },
                 },
             },
+            promotions: {
+                include: { promotion: true },
+                where: { promotion: { isActive: true } },
+            },
         },
     });
 

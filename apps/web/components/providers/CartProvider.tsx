@@ -7,19 +7,48 @@ interface CartItem {
     productId: string;
     quantity: number;
     product: {
+        id: string;
         name: string;
-        priceTTC: number;
-        imageUrl: string;
         slug: string;
+        priceTTC: number;
+        imageUrl: string | null;
         weight: number | null;
         stock: number;
-        maxOrderQuantity?: number;
+        maxOrderQuantity: number | null;
     };
+    appliedPromotionId?: string | null;
+    appliedPromotionPrice?: number | null;
+    appliedPromotion?: {
+        id: string;
+        title: string;
+        amount: number;
+        type: string;
+        imageUrl: string;
+        redirectUrl: string;
+        position: number;
+        isActive: boolean;
+        startDate: Date;
+        endDate: Date;
+        buttonText: string;
+        buttonColor: string | null;
+        buttonTextColor: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    } | null;
 }
 
 interface Cart {
     id: string;
     items: CartItem[];
+    appliedPromoCode?: string | null;
+    promoCode?: {
+        code: string;
+        discountType: 'EURO' | 'PERCENTAGE';
+        discountAmount: number;
+        minCartAmount?: number;
+        freeShipping: boolean;
+        freeShippingMethodId?: string | null;
+    } | null;
 }
 
 interface CartContextType {
@@ -37,6 +66,8 @@ interface CartContextType {
     clearCart: () => Promise<void>;
     getTotalWeight: () => number;
     getTotalPrice: () => number;
+    applyPromoCode: (code: string) => Promise<{ success: boolean; error?: string }>;
+    removePromoCode: () => Promise<void>;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -144,6 +175,43 @@ export function CartProvider({ children }: { children: ReactNode }) {
         }
     };
 
+    const applyPromoCode = async (code: string) => {
+        try {
+            const res = await fetch('/api/cart/promo-code', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                return { success: false, error: data.error };
+            }
+
+            await fetchCart();
+            return { success: true };
+        } catch (error) {
+            console.error('Apply promo code error', error);
+            return { success: false, error: 'Erreur inattendue' };
+        }
+    };
+
+    const removePromoCode = async () => {
+        try {
+            const res = await fetch('/api/cart/promo-code', {
+                method: 'DELETE',
+            });
+
+            if (!res.ok) throw new Error('Failed to remove promo code');
+
+            await fetchCart();
+        } catch (error) {
+            console.error('Remove promo code error', error);
+            throw error;
+        }
+    };
+
     const getTotalWeight = () => {
         if (!cart) return 0;
         return cart.items.reduce((total, item) => {
@@ -154,9 +222,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
     const getTotalPrice = () => {
         if (!cart) return 0;
-        return cart.items.reduce((total, item) => {
-            return total + (item.product.priceTTC * item.quantity);
+        const subtotal = cart.items.reduce((total, item) => {
+            const price = item.appliedPromotionPrice ? item.appliedPromotionPrice : item.product.priceTTC;
+            return total + (price * item.quantity);
         }, 0);
+
+        // Apply promo code discount if present
+        if (cart.promoCode) {
+            let discount = 0;
+            if (cart.promoCode.discountType === 'PERCENTAGE') {
+                discount = (subtotal * cart.promoCode.discountAmount) / 100;
+            } else {
+                discount = cart.promoCode.discountAmount;
+            }
+            return Math.max(0, subtotal - discount);
+        }
+
+        return subtotal;
     };
 
     return (
@@ -176,6 +258,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
                 clearCart,
                 getTotalWeight,
                 getTotalPrice,
+                applyPromoCode,
+                removePromoCode,
             }}
         >
             {children}
