@@ -8,6 +8,7 @@ import { formatPrice, calculateDiscountPercentage } from '@/lib/utils';
 import type { Product } from '@/lib/types';
 import { useCart } from '@/hooks/useCart';
 import { getActivePromotion, calculatePromotionPrice, formatPromotionBadge } from '@/lib/utils/promotion';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 // ============================================================================
 // Product Card Component
@@ -18,7 +19,8 @@ interface ProductCardProps {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-    const [isLiked, setIsLiked] = useState(false);
+    const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+    const isLiked = isInWishlist(product.id);
     const { addToCart, isAdding, cart } = useCart();
     const [localIsAdding, setLocalIsAdding] = useState(false);
 
@@ -57,6 +59,17 @@ export function ProductCard({ product }: ProductCardProps) {
         }
     };
 
+    const handleToggleWishlist = async (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (isLiked) {
+            await removeFromWishlist(product.id);
+        } else {
+            await addToWishlist(product.id);
+        }
+    };
+
     return (
         <div className="group bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col h-full">
             <Link href={`/product/${product.slug}`} className="block flex-1 flex flex-col">
@@ -78,15 +91,12 @@ export function ProductCard({ product }: ProductCardProps) {
 
                     {/* Like Button - Larger touch target */}
                     <button
-                        onClick={(e) => {
-                            e.preventDefault();
-                            setIsLiked(!isLiked);
-                        }}
+                        onClick={handleToggleWishlist}
                         className={`absolute top-3 left-3 w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 z-10 shadow-md ${isLiked
                             ? 'bg-[#fe0090] text-white'
                             : 'bg-white/95 text-gray-400 hover:text-[#fe0090]'
                             }`}
-                        aria-label="Ajouter aux favoris"
+                        aria-label={isLiked ? "Retirer des favoris" : "Ajouter aux favoris"}
                     >
                         <Heart size={22} fill={isLiked ? 'currentColor' : 'none'} />
                     </button>

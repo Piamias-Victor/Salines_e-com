@@ -32,15 +32,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
 
     // Load user from localStorage on mount
+    // Load user from localStorage on mount and refresh token
     useEffect(() => {
-        const storedToken = localStorage.getItem('accessToken');
-        const storedUser = localStorage.getItem('user');
+        const initAuth = async () => {
+            const storedToken = localStorage.getItem('accessToken');
+            const storedUser = localStorage.getItem('user');
 
-        if (storedToken && storedUser) {
-            setAccessToken(storedToken);
-            setUser(JSON.parse(storedUser));
-        }
-        setIsLoading(false);
+            if (storedToken && storedUser) {
+                setAccessToken(storedToken);
+                setUser(JSON.parse(storedUser));
+
+                // Try to refresh token immediately to ensure validity
+                try {
+                    const response = await fetch('/api/auth/refresh', {
+                        method: 'POST',
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        setAccessToken(data.accessToken);
+                        localStorage.setItem('accessToken', data.accessToken);
+                    } else if (response.status === 401) {
+                        // If refresh fails with 401, session is invalid
+                        setUser(null);
+                        setAccessToken(null);
+                        localStorage.removeItem('user');
+                        localStorage.removeItem('accessToken');
+                    }
+                } catch (error) {
+                    console.error('Token refresh failed on init:', error);
+                }
+            }
+            setIsLoading(false);
+        };
+
+        initAuth();
     }, []);
 
     // Refresh token periodically

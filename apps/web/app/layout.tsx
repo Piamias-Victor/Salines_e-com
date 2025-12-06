@@ -5,6 +5,7 @@ import { GlobalNavigation } from "@/components/organisms/GlobalNavigation";
 import { CartProvider } from "@/components/providers/CartProvider";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ToastProvider } from "@/contexts/ToastContext";
+import { WishlistProvider } from "@/contexts/WishlistContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Navbar } from '@/components/organisms/Navbar';
 import { CartDrawer } from "@/components/organisms/CartDrawer";
@@ -39,10 +40,12 @@ export default function RootLayout({
           <ToastProvider>
             <AuthProvider>
               <CartProvider>
-                <GlobalNavigation />
-                <CartDrawer />
-                {children}
-                <ConditionalFooter />
+                <WishlistProvider>
+                  <GlobalNavigation />
+                  <CartDrawer />
+                  {children}
+                  <ConditionalFooter />
+                </WishlistProvider>
               </CartProvider>
             </AuthProvider>
           </ToastProvider>
