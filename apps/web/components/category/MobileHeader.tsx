@@ -4,6 +4,11 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { SlidersHorizontal, X, ChevronDown, Check } from 'lucide-react';
 
+interface Category {
+    id: string;
+    name: string;
+}
+
 interface Brand {
     id: string;
     name: string;
@@ -13,6 +18,7 @@ interface CurrentFilters {
     minPrice?: string;
     maxPrice?: string;
     brands: string[];
+    categories?: string[];
     inStock: boolean;
     onlyPromo: boolean;
 }
@@ -22,7 +28,8 @@ interface MobileHeaderProps {
     totalProducts: number;
     currentSort: string;
     activeFiltersCount: number;
-    brands: Brand[];
+    brands?: Brand[];
+    categories?: Category[];
     currentFilters: CurrentFilters;
 }
 
@@ -40,7 +47,8 @@ export function MobileHeader({
     totalProducts,
     currentSort,
     activeFiltersCount,
-    brands,
+    brands = [],
+    categories = [],
     currentFilters,
 }: MobileHeaderProps) {
     const router = useRouter();
@@ -48,7 +56,10 @@ export function MobileHeader({
     const searchParams = useSearchParams();
     const [showFilters, setShowFilters] = useState(false);
     const [showSortMenu, setShowSortMenu] = useState(false);
-    const [tempFilters, setTempFilters] = useState(currentFilters);
+    const [tempFilters, setTempFilters] = useState({
+        ...currentFilters,
+        categories: currentFilters.categories || [],
+    });
 
     const handleSortChange = (value: string) => {
         const params = new URLSearchParams(searchParams);
@@ -84,6 +95,13 @@ export function MobileHeader({
             params.delete('brands');
         }
 
+        // Categories
+        if (tempFilters.categories && tempFilters.categories.length > 0) {
+            params.set('categories', tempFilters.categories.join(','));
+        } else {
+            params.delete('categories');
+        }
+
         // Stock
         if (tempFilters.inStock) {
             params.set('inStock', 'true');
@@ -108,6 +126,7 @@ export function MobileHeader({
             minPrice: '',
             maxPrice: '',
             brands: [],
+            categories: [],
             inStock: false,
             onlyPromo: false,
         });
@@ -175,8 +194,8 @@ export function MobileHeader({
                                         key={option.value}
                                         onClick={() => handleSortChange(option.value)}
                                         className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${currentSort === option.value
-                                                ? 'bg-[#FE0090]/10 text-[#FE0090] font-semibold'
-                                                : 'hover:bg-gray-50 text-gray-700'
+                                            ? 'bg-[#FE0090]/10 text-[#FE0090] font-semibold'
+                                            : 'hover:bg-gray-50 text-gray-700'
                                             }`}
                                     >
                                         <span>{option.label}</span>
@@ -233,6 +252,39 @@ export function MobileHeader({
                                     />
                                 </div>
                             </div>
+
+                            {/* Categories Filter */}
+                            {categories.length > 0 && (
+                                <div>
+                                    <h3 className="font-semibold text-gray-900 mb-3">Catégories</h3>
+                                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                                        {categories.map((category) => (
+                                            <label key={category.id} className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={tempFilters.categories?.includes(category.id)}
+                                                    onChange={(e) => {
+                                                        const current = tempFilters.categories || [];
+                                                        if (e.target.checked) {
+                                                            setTempFilters({
+                                                                ...tempFilters,
+                                                                categories: [...current, category.id],
+                                                            });
+                                                        } else {
+                                                            setTempFilters({
+                                                                ...tempFilters,
+                                                                categories: current.filter(id => id !== category.id),
+                                                            });
+                                                        }
+                                                    }}
+                                                    className="w-5 h-5 text-[#FE0090] border-gray-300 rounded focus:ring-[#FE0090]"
+                                                />
+                                                <span className="text-sm text-gray-700 font-medium">{category.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Brands Filter */}
                             {brands.length > 0 && (

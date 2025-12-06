@@ -1,7 +1,7 @@
 import { CategoryBreadcrumb } from '@/components/category/CategoryBreadcrumb';
 import { MobileHeader } from '@/components/category/MobileHeader';
 import { DesktopHeader } from '@/components/category/DesktopHeader';
-import { DesktopFiltersSidebar } from '@/components/category/DesktopFiltersSidebar';
+import { BrandFiltersSidebar } from '@/components/brand/BrandFiltersSidebar';
 import { ProductsGrid } from '@/components/category/ProductsGrid';
 import { Pagination } from '@/components/molecules/Pagination';
 import { ActiveFilters } from '@/components/category/ActiveFilters';
@@ -9,34 +9,34 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { buildProductWhereClause, buildProductOrderBy, serializeProduct, getActiveFiltersCount } from '@/lib/filterUtils';
 
-interface CategoryAllPageProps {
+interface BrandPageProps {
     params: Promise<{ slug: string }>;
     searchParams: Promise<{
         page?: string;
         sort?: string;
         minPrice?: string;
         maxPrice?: string;
-        brands?: string;
+        categories?: string;
         inStock?: string;
         onlyPromo?: string;
     }>;
 }
 
-export async function generateMetadata({ params }: CategoryAllPageProps) {
+export async function generateMetadata({ params }: BrandPageProps) {
     const { slug } = await params;
-    const category = await prisma.category.findUnique({
+    const brand = await prisma.brand.findUnique({
         where: { slug, isActive: true },
     });
 
-    if (!category) return { title: 'Catégorie non trouvée' };
+    if (!brand) return { title: 'Marque non trouvée' };
 
     return {
-        title: `${category.name} - Tous les produits - Pharmacie des Salines`,
-        description: category.metaDescription || `Découvrez tous les produits ${category.name}`,
+        title: `${brand.name} - Pharmacie des Salines`,
+        description: `Découvrez tous les produits de la marque ${brand.name}`,
     };
 }
 
-export default async function CategoryAllPage({ params, searchParams }: CategoryAllPageProps) {
+export default async function BrandPage({ params, searchParams }: BrandPageProps) {
     const { slug } = await params;
     const search = await searchParams;
 
@@ -44,15 +44,15 @@ export default async function CategoryAllPage({ params, searchParams }: Category
     const perPage = 24;
     const skip = (page - 1) * perPage;
 
-    // Fetch category
-    const category = await prisma.category.findUnique({
+    // Fetch brand
+    const brand = await prisma.brand.findUnique({
         where: { slug, isActive: true },
     });
 
-    if (!category) notFound();
+    if (!brand) notFound();
 
     // Build filters
-    const where = buildProductWhereClause(search, { categoryId: category.id });
+    const where = buildProductWhereClause(search, { brandId: brand.id });
     const orderBy = buildProductOrderBy(search.sort);
 
     // Fetch products
@@ -76,15 +76,15 @@ export default async function CategoryAllPage({ params, searchParams }: Category
     // Serialize products
     const products = productsRaw.map(serializeProduct);
 
-    // Fetch all brands for filters
-    const brands = await prisma.brand.findMany({
+    // Fetch all categories for filters (categories that have products of this brand)
+    const categories = await prisma.category.findMany({
         where: {
             isActive: true,
             products: {
                 some: {
                     product: {
-                        categories: {
-                            some: { categoryId: category.id },
+                        brands: {
+                            some: { brandId: brand.id },
                         },
                     },
                 },
@@ -104,8 +104,8 @@ export default async function CategoryAllPage({ params, searchParams }: Category
                     <CategoryBreadcrumb
                         items={[
                             { label: 'Accueil', href: '/' },
-                            { label: category.name, href: `/category/${category.slug}` },
-                            { label: 'Tous les produits', href: `/category/${category.slug}/all` },
+                            { label: 'Marques', href: '/brands' }, // Assuming there is a brands listing page, or just link to home
+                            { label: brand.name, href: `/brand/${brand.slug}` },
                         ]}
                     />
                 </div>
@@ -114,15 +114,16 @@ export default async function CategoryAllPage({ params, searchParams }: Category
             {/* Mobile Header - Not Sticky */}
             <div className="lg:hidden bg-white border-b">
                 <MobileHeader
-                    categoryName={category.name}
+                    categoryName={brand.name}
                     totalProducts={totalCount}
                     currentSort={search.sort || 'relevance'}
                     activeFiltersCount={activeFiltersCount}
-                    brands={brands}
+                    categories={categories}
                     currentFilters={{
                         minPrice: search.minPrice,
                         maxPrice: search.maxPrice,
-                        brands: search.brands?.split(',').filter(Boolean) || [],
+                        brands: [],
+                        categories: search.categories?.split(',').filter(Boolean) || [],
                         inStock: search.inStock === 'true',
                         onlyPromo: search.onlyPromo === 'true',
                     }}
@@ -135,12 +136,12 @@ export default async function CategoryAllPage({ params, searchParams }: Category
                     {/* Desktop Sidebar - Sticky */}
                     <aside className="hidden lg:block lg:col-span-3">
                         <div className="sticky top-6">
-                            <DesktopFiltersSidebar
-                                brands={brands}
+                            <BrandFiltersSidebar
+                                categories={categories}
                                 currentFilters={{
                                     minPrice: search.minPrice,
                                     maxPrice: search.maxPrice,
-                                    brands: search.brands?.split(',').filter(Boolean) || [],
+                                    categories: search.categories?.split(',').filter(Boolean) || [],
                                     inStock: search.inStock === 'true',
                                     onlyPromo: search.onlyPromo === 'true',
                                 }}
@@ -153,11 +154,24 @@ export default async function CategoryAllPage({ params, searchParams }: Category
                         {/* Desktop Header */}
                         <div className="hidden lg:block mb-6">
                             <DesktopHeader
-                                categoryName={category.name}
+                                categoryName={brand.name}
                                 totalProducts={totalCount}
                                 currentSort={search.sort || 'relevance'}
                             />
                         </div>
+
+                        {/* Brand Description - Desktop */}
+                        {brand.description && (
+                            <div className="hidden lg:block bg-white rounded-lg p-6 mb-8 shadow-sm border border-gray-100">
+                                <div className="prose max-w-none text-gray-600">
+                                    {brand.description.split('\n').map((paragraph, index) => (
+                                        <p key={index} className="mb-4 last:mb-0">
+                                            {paragraph}
+                                        </p>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Active Filters */}
                         {activeFiltersCount > 0 && (
@@ -166,11 +180,11 @@ export default async function CategoryAllPage({ params, searchParams }: Category
                                     filters={{
                                         minPrice: search.minPrice,
                                         maxPrice: search.maxPrice,
-                                        brands: search.brands?.split(',').filter(Boolean) || [],
+                                        brands: [], // No brand filter display
                                         inStock: search.inStock === 'true',
                                         onlyPromo: search.onlyPromo === 'true',
                                     }}
-                                    brandsList={brands}
+                                    brandsList={[]}
                                 />
                             </div>
                         )}
@@ -184,8 +198,21 @@ export default async function CategoryAllPage({ params, searchParams }: Category
                                 <Pagination
                                     currentPage={page}
                                     totalPages={totalPages}
-                                    baseUrl={`/category/${category.slug}/all`}
+                                    baseUrl={`/brand/${brand.slug}`}
                                 />
+                            </div>
+                        )}
+
+                        {/* Brand Description - Mobile */}
+                        {brand.description && (
+                            <div className="lg:hidden mt-8 bg-white rounded-lg p-6 shadow-sm border border-gray-100">
+                                <div className="prose max-w-none text-gray-600">
+                                    {brand.description.split('\n').map((paragraph, index) => (
+                                        <p key={index} className="mb-4 last:mb-0">
+                                            {paragraph}
+                                        </p>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </main>

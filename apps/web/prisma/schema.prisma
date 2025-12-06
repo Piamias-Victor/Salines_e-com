@@ -151,6 +151,7 @@ model Brand {
   id       String  @id @default(cuid())
   name     String
   slug     String  @unique
+  description String? @db.Text // Description complète de la marque
   imageUrl String? // Logo de la marque
   position Int     @default(0) // Ordre d'affichage
   searchPosition Int @default(0) // Ordre d'affichage dans la barre de recherche

@@ -18,6 +18,7 @@ export function BrandForm({ initialData }: BrandFormProps) {
         name: initialData?.name || '',
         slug: initialData?.slug || '',
         imageUrl: initialData?.imageUrl || '',
+        description: initialData?.description || '',
         isActive: initialData?.isActive ?? true,
         productIds: initialData?.products?.map((p: any) => p.productId) || [],
     });
@@ -104,6 +105,15 @@ export function BrandForm({ initialData }: BrandFormProps) {
                                 onChange={(e) => handleFieldChange('slug', e.target.value)}
                                 className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090] font-mono text-sm"
                                 placeholder="loreal"
+                            />
+                        </FormField>
+
+                        <FormField label="Description" name="description">
+                            <textarea
+                                value={formData.description || ''}
+                                onChange={(e) => handleFieldChange('description', e.target.value)}
+                                className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090]/20 focus:border-[#fe0090] min-h-[150px]"
+                                placeholder="Description de la marque..."
                             />
                         </FormField>
                     </div>

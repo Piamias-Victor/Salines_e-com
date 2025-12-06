@@ -4,19 +4,35 @@ export interface FilterParams {
     minPrice?: string;
     maxPrice?: string;
     brands?: string;
+    categories?: string;
     inStock?: string;
     onlyPromo?: string;
     sort?: string;
     page?: string;
 }
 
-export function buildProductWhereClause(categoryId: string, params: FilterParams) {
+interface ProductScope {
+    categoryId?: string;
+    brandId?: string;
+}
+
+export function buildProductWhereClause(params: FilterParams, scope: ProductScope = {}) {
     const where: any = {
         isActive: true,
-        categories: {
-            some: { categoryId },
-        },
     };
+
+    // Apply scope
+    if (scope.categoryId) {
+        where.categories = {
+            some: { categoryId: scope.categoryId },
+        };
+    }
+
+    if (scope.brandId) {
+        where.brands = {
+            some: { brandId: scope.brandId },
+        };
+    }
 
     // Price filters
     if (params.minPrice || params.maxPrice) {
@@ -34,15 +50,40 @@ export function buildProductWhereClause(categoryId: string, params: FilterParams
         where.stock = { gt: 0 };
     }
 
-    // Brand filter
+    // Brand filter (for Category page)
     if (params.brands) {
         const brandIds = params.brands.split(',').filter(Boolean);
         if (brandIds.length > 0) {
+            // If we already have a brand scope, this is redundant or conflicting, but usually we don't mix.
+            // If we are in a Category page (scope.categoryId), we filter by brands.
             where.brands = {
                 some: {
                     brandId: { in: brandIds },
                 },
             };
+        }
+    }
+
+    // Category filter (for Brand page)
+    if (params.categories) {
+        const categoryIds = params.categories.split(',').filter(Boolean);
+        if (categoryIds.length > 0) {
+            // If we are in a Brand page (scope.brandId), we filter by categories.
+            // We need to handle the case where we might already have a category scope (unlikely for Brand page).
+            if (where.categories) {
+                // If scope.categoryId exists, we need AND logic
+                where.AND = [
+                    { categories: where.categories },
+                    { categories: { some: { categoryId: { in: categoryIds } } } }
+                ];
+                delete where.categories;
+            } else {
+                where.categories = {
+                    some: {
+                        categoryId: { in: categoryIds },
+                    },
+                };
+            }
         }
     }
 
@@ -91,6 +132,7 @@ export function getActiveFiltersCount(params: FilterParams): number {
     let count = 0;
     if (params.minPrice || params.maxPrice) count++;
     if (params.brands) count += params.brands.split(',').filter(Boolean).length;
+    if (params.categories) count += params.categories.split(',').filter(Boolean).length;
     if (params.inStock === 'true') count++;
     if (params.onlyPromo === 'true') count++;
     return count;

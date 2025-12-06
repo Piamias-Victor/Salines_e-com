@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
             name,
             slug,
             imageUrl,
+            description,
             position,
             isActive,
             productIds,
@@ -45,6 +46,7 @@ export async function POST(request: NextRequest) {
                 name,
                 slug,
                 imageUrl,
+                description,
                 position: parseInt(position) || 0,
                 isActive: isActive !== undefined ? isActive : true,
                 products: productIds?.length
