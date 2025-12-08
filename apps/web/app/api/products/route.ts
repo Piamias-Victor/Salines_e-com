@@ -136,14 +136,14 @@ export async function GET(request: NextRequest) {
         ]);
 
         // Format response
-        const formattedProducts = products.map((product) => ({
+        const formattedProducts = products.map((product: any) => ({
             id: product.id,
             name: product.name,
             slug: product.slug,
             ean: product.ean,
             imageUrl: product.imageUrl,
             priceTTC: Number(product.priceTTC), // Convert Decimal to number
-            brands: product.brands.map((b) => b.brandId), // Array of brand IDs (will be names when Brand model exists)
+            brands: product.brands.map((b: any) => b.brandId), // Array of brand IDs (will be names when Brand model exists)
             promotionId: product.promotionId,
             stock: product.stock,
             isActive: product.isActive,

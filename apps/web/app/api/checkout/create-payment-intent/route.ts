@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         }
 
         // Calculate subtotal using applied promotion prices
-        const subtotal = cart.items.reduce((sum, item) => {
+        const subtotal = cart.items.reduce((sum: number, item: any) => {
             // Use applied promotion price if exists, otherwise use regular price
             const price = item.appliedPromotionPrice
                 ? Number(item.appliedPromotionPrice)
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
         }
 
         if (cart.shippingMethodId && !isFreeShippingViaCode) {
-            const totalWeight = cart.items.reduce((sum, item) => {
+            const totalWeight = cart.items.reduce((sum: number, item: any) => {
                 return sum + (Number(item.product.weight) || 0) * item.quantity;
             }, 0);
 

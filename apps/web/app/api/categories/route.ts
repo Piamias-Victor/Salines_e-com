@@ -29,16 +29,16 @@ export async function GET(request: Request) {
         const rootCategories: any[] = [];
 
         // First pass: create map of all categories
-        allCategories.forEach(cat => {
+        allCategories.forEach((cat: any) => {
             categoryMap.set(cat.id, { ...cat, children: [] });
         });
 
         // Second pass: build hierarchy
-        allCategories.forEach(cat => {
+        allCategories.forEach((cat: any) => {
             const category = categoryMap.get(cat.id);
             // If category has parents, add it as a child to each parent
             if (cat.parents && cat.parents.length > 0) {
-                cat.parents.forEach(parent => {
+                cat.parents.forEach((parent: any) => {
                     const parentCategory = categoryMap.get(parent.id);
                     if (parentCategory && !parentCategory.children.find((c: any) => c.id === category.id)) {
                         parentCategory.children.push(category);

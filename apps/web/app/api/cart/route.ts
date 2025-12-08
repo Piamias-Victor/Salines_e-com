@@ -26,7 +26,7 @@ export async function GET() {
         // Serialize Decimal fields for JSON response
         const serializedCart = {
             ...cart,
-            items: cart.items.map(item => ({
+            items: cart.items.map((item: any) => ({
                 ...item,
                 product: {
                     ...item.product,

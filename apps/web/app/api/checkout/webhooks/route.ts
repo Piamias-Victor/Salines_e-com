@@ -139,7 +139,7 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
             shippingAddressId: undefined as any,
             billingAddressId: undefined as any,
             items: {
-                create: cart.items.map((item) => ({
+                create: cart.items.map((item: any) => ({
                     productId: item.productId,
                     quantity: item.quantity,
                     price: item.appliedPromotionPrice || item.product.priceTTC,
