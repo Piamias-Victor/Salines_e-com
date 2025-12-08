@@ -183,7 +183,7 @@ export default function ShowcasePage() {
             // Helper to flatten categories and add type
             const flatten = (list: any[]): Category[] => {
                 let result: Category[] = [];
-                list.forEach(item => {
+                list.forEach((item: any) => {
                     const cat: Category = { ...item, type: 'category' };
                     result.push(cat);
                     if (item.children) result = result.concat(flatten(item.children));
@@ -243,8 +243,8 @@ export default function ShowcasePage() {
         if (!over || active.id === over.id) return;
 
         const list = getActiveList();
-        const oldIndex = list.findIndex((item) => item.id === active.id);
-        const newIndex = list.findIndex((item) => item.id === over.id);
+        const oldIndex = list.findIndex((item: any) => item.id === active.id);
+        const newIndex = list.findIndex((item: any) => item.id === over.id);
 
         const newList = arrayMove(list, oldIndex, newIndex);
 
@@ -256,7 +256,7 @@ export default function ShowcasePage() {
 
         let currentPos = isProducts ? 0 : 1; // Products are 0-indexed, others 1-indexed (0 is hidden)
 
-        const updatedList = newList.map(item => {
+        const updatedList = newList.map((item: any) => {
             // For products, always update position
             if (isProducts) {
                 return { ...item, [field]: currentPos++ };
@@ -298,9 +298,9 @@ export default function ShowcasePage() {
         const list = getActiveList();
 
         // Calculate max position from the *current* list state to append to the end
-        const maxPos = Math.max(0, ...list.map(i => (i as any)[field] as number));
+        const maxPos = Math.max(0, ...list.map((i: any) => (i as any)[field] as number));
 
-        const newList = list.map(item => {
+        const newList = list.map((item: any) => {
             if (item.id === id) {
                 const currentVal = (item as any)[field] as number;
                 if (currentVal > 0) {
@@ -332,7 +332,7 @@ export default function ShowcasePage() {
 
             // Re-calculate positions for visible items (1, 2, 3...)
             let currentPos = 1;
-            const updates = list.map(item => {
+            const updates = list.map((item: any) => {
                 let newPos = (item as any)[field];
                 if ((item as any)[field] > 0) {
                     newPos = currentPos++;
@@ -358,7 +358,7 @@ export default function ShowcasePage() {
 
             // Special case for Featured Products (structure is different)
             if (activeTab === 'showcase' && showcaseSubTab === 'products') {
-                const productUpdates = list.map((p, index) => ({
+                const productUpdates = list.map((p: any, index: number) => ({
                     id: p.id,
                     position: index,
                 }));

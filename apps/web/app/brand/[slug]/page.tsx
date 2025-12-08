@@ -164,7 +164,7 @@ export default async function BrandPage({ params, searchParams }: BrandPageProps
                         {brand.description && (
                             <div className="hidden lg:block bg-white rounded-lg p-6 mb-8 shadow-sm border border-gray-100">
                                 <div className="prose max-w-none text-gray-600">
-                                    {brand.description.split('\n').map((paragraph, index) => (
+                                    {brand.description.split('\n').map((paragraph: string, index: number) => (
                                         <p key={index} className="mb-4 last:mb-0">
                                             {paragraph}
                                         </p>

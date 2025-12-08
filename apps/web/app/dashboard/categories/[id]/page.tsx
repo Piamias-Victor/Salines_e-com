@@ -26,7 +26,7 @@ export default function EditCategoryPage({ params }: { params: Promise<{ id: str
                 if (allCatsRes.ok) {
                     const allData = await allCatsRes.json();
                     const flatten = (cats: any[]): any[] => {
-                        return cats.reduce((acc, cat) => {
+                        return cats.reduce((acc: any[], cat: any) => {
                             return [...acc, cat, ...flatten(cat.children || [])];
                         }, []);
                     };

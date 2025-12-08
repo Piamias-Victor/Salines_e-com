@@ -13,7 +13,7 @@ export default function NewCategoryPage() {
                 const data = await res.json();
                 // Flatten the hierarchical data for the form
                 const flatten = (cats: any[]): any[] => {
-                    return cats.reduce((acc, cat) => {
+                    return cats.reduce((acc: any[], cat: any) => {
                         return [...acc, cat, ...flatten(cat.children || [])];
                     }, []);
                 };

@@ -14,12 +14,12 @@ export default function CartPage() {
     const [wantsSamples, setWantsSamples] = useState(false);
 
     // Calculate totals with promotion prices
-    const subtotal = cart?.items.reduce((acc, item) => {
+    const subtotal = cart?.items.reduce((acc: number, item: any) => {
         const price = item.appliedPromotionPrice ? Number(item.appliedPromotionPrice) : Number(item.product.priceTTC);
         return acc + (price * item.quantity);
     }, 0) || 0;
 
-    const originalTotal = cart?.items.reduce((acc, item) => acc + (Number(item.product.priceTTC) * item.quantity), 0) || 0;
+    const originalTotal = cart?.items.reduce((acc: number, item: any) => acc + (Number(item.product.priceTTC) * item.quantity), 0) || 0;
     const productSavings = originalTotal - subtotal;
 
     let total = subtotal;
@@ -111,7 +111,7 @@ export default function CartPage() {
                         {/* Items List */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                             <ul className="divide-y divide-gray-100">
-                                {cart.items.map((item) => {
+                                {cart.items.map((item: any) => {
                                     const isStockIssue = item.quantity > item.product.stock;
                                     return (
                                         <li key={item.id} className={`p-4 md:p-6 transition-colors ${isStockIssue ? 'bg-red-50/50' : 'hover:bg-gray-50/50'}`}>

@@ -20,7 +20,7 @@ export default function CategoriesPage() {
     };
 
     const filteredCategories = searchQuery
-        ? categories.filter((cat) =>
+        ? categories.filter((cat: any) =>
             cat.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
         : categories;
