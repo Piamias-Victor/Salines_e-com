@@ -1,0 +1,88 @@
+'use client';
+
+import { useState } from 'react';
+import { FileText, Info, Lightbulb } from 'lucide-react';
+
+interface ProductInfoTabsProps {
+    description: string | null;
+    composition: string | null;
+    usageTips: string | null;
+}
+
+type TabType = 'description' | 'composition' | 'usage';
+
+export function ProductInfoTabs({ description, composition, usageTips }: ProductInfoTabsProps) {
+    const [activeTab, setActiveTab] = useState<TabType>('description');
+
+    const tabs = [
+        {
+            id: 'description' as TabType,
+            label: 'Description',
+            icon: Info,
+            content: description,
+        },
+        {
+            id: 'composition' as TabType,
+            label: 'Composition',
+            icon: FileText,
+            content: composition,
+        },
+        {
+            id: 'usage' as TabType,
+            label: 'Conseils d\'utilisation',
+            icon: Lightbulb,
+            content: usageTips,
+        },
+    ].filter(tab => tab.content); // Only show tabs with content
+
+    if (tabs.length === 0) return null;
+
+    return (
+        <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* Mobile-first Tab Navigation */}
+            <div className="flex overflow-x-auto scrollbar-hide border-b border-gray-100">
+                {tabs.map((tab) => {
+                    const Icon = tab.icon;
+                    const isActive = activeTab === tab.id;
+
+                    return (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`
+                                flex-1 min-w-fit px-4 md:px-6 py-4 flex items-center justify-center gap-2
+                                font-medium text-sm transition-all relative
+                                ${isActive
+                                    ? 'text-[#fe0090] bg-pink-50/50'
+                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                }
+                            `}
+                        >
+                            <Icon size={18} className={isActive ? 'text-[#fe0090]' : 'text-gray-400'} />
+                            <span className="whitespace-nowrap">{tab.label}</span>
+
+                            {/* Active indicator */}
+                            {isActive && (
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#fe0090] to-pink-400" />
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+
+            {/* Tab Content */}
+            <div className="p-6 md:p-8">
+                {tabs.map((tab) => (
+                    <div
+                        key={tab.id}
+                        className={`
+                            prose prose-sm md:prose-base max-w-none
+                            ${activeTab === tab.id ? 'block' : 'hidden'}
+                        `}
+                        dangerouslySetInnerHTML={{ __html: tab.content || '' }}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+}

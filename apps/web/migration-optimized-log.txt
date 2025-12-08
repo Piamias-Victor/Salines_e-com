@@ -1,0 +1,289 @@
+🚀 === MIGRATION OPTIMISÉE phardev → Salines ===
+
+📥 Chargement des mappings...
+✅ 294 catégories mappées
+✅ 615 laboratoires mappés
+
+🛒 === MIGRATION PRODUITS (OPTIMISÉE) ===
+
+📖 Chargement produits Salines...
+   ✓ 21283 produits avec EAN13
+
+📖 Chargement produits phardev...
+   ✓ 26373 produits phardev en mémoire
+
+📖 Chargement images phardev...
+   ✓ 17944 images en mémoire
+
+📖 Chargement catégories produits phardev...
+   ✓ 38548 associations catégories en mémoire
+
+🚀 Traitement par batch de 100...
+
+📦 Batch 1/213 (100 produits)...
+   ✅ 38 mis à jour, 62 non trouvés, 0 erreurs (0.5%)
+
+📦 Batch 2/213 (100 produits)...
+   ✅ 67 mis à jour, 133 non trouvés, 0 erreurs (0.9%)
+
+📦 Batch 3/213 (100 produits)...
+   ✅ 96 mis à jour, 204 non trouvés, 0 erreurs (1.4%)
+
+📦 Batch 4/213 (100 produits)...
+   ✅ 135 mis à jour, 265 non trouvés, 0 erreurs (1.9%)
+
+📦 Batch 5/213 (100 produits)...
+   ✅ 199 mis à jour, 301 non trouvés, 0 erreurs (2.3%)
+
+📦 Batch 6/213 (100 produits)...
+   ✅ 273 mis à jour, 327 non trouvés, 0 erreurs (2.8%)
+
+📦 Batch 7/213 (100 produits)...
+   ✅ 306 mis à jour, 394 non trouvés, 0 erreurs (3.3%)
+
+📦 Batch 8/213 (100 produits)...
+   ✅ 337 mis à jour, 463 non trouvés, 0 erreurs (3.8%)
+
+📦 Batch 9/213 (100 produits)...
+   ✅ 380 mis à jour, 520 non trouvés, 0 erreurs (4.2%)
+
+📦 Batch 10/213 (100 produits)...
+   ✅ 428 mis à jour, 572 non trouvés, 0 erreurs (4.7%)
+
+📦 Batch 11/213 (100 produits)...
+   ✅ 477 mis à jour, 623 non trouvés, 0 erreurs (5.2%)
+
+📦 Batch 12/213 (100 produits)...
+   ✅ 516 mis à jour, 684 non trouvés, 0 erreurs (5.6%)
+
+📦 Batch 13/213 (100 produits)...
+   ✅ 559 mis à jour, 741 non trouvés, 0 erreurs (6.1%)
+
+📦 Batch 14/213 (100 produits)...
+   ✅ 601 mis à jour, 799 non trouvés, 0 erreurs (6.6%)
+
+📦 Batch 15/213 (100 produits)...
+   ✅ 633 mis à jour, 867 non trouvés, 0 erreurs (7.0%)
+
+📦 Batch 16/213 (100 produits)...
+   ✅ 657 mis à jour, 943 non trouvés, 0 erreurs (7.5%)
+
+📦 Batch 17/213 (100 produits)...
+   ✅ 704 mis à jour, 996 non trouvés, 0 erreurs (8.0%)
+
+📦 Batch 18/213 (100 produits)...
+   ✅ 753 mis à jour, 1047 non trouvés, 0 erreurs (8.5%)
+
+📦 Batch 19/213 (100 produits)...
+   ✅ 793 mis à jour, 1107 non trouvés, 0 erreurs (8.9%)
+
+📦 Batch 20/213 (100 produits)...
+   ✅ 825 mis à jour, 1175 non trouvés, 0 erreurs (9.4%)
+
+📦 Batch 21/213 (100 produits)...
+   ✅ 855 mis à jour, 1245 non trouvés, 0 erreurs (9.9%)
+
+📦 Batch 22/213 (100 produits)...
+   ✅ 902 mis à jour, 1298 non trouvés, 0 erreurs (10.3%)
+
+📦 Batch 23/213 (100 produits)...
+   ✅ 925 mis à jour, 1375 non trouvés, 0 erreurs (10.8%)
+
+📦 Batch 24/213 (100 produits)...
+   ✅ 935 mis à jour, 1465 non trouvés, 0 erreurs (11.3%)
+
+📦 Batch 25/213 (100 produits)...
+   ✅ 945 mis à jour, 1555 non trouvés, 0 erreurs (11.7%)
+
+📦 Batch 26/213 (100 produits)...
+   ✅ 959 mis à jour, 1641 non trouvés, 0 erreurs (12.2%)
+
+📦 Batch 27/213 (100 produits)...
+   ✅ 973 mis à jour, 1727 non trouvés, 0 erreurs (12.7%)
+
+📦 Batch 28/213 (100 produits)...
+   ✅ 981 mis à jour, 1819 non trouvés, 0 erreurs (13.2%)
+
+📦 Batch 29/213 (100 produits)...
+   ✅ 988 mis à jour, 1912 non trouvés, 0 erreurs (13.6%)
+
+📦 Batch 30/213 (100 produits)...
+   ✅ 996 mis à jour, 2004 non trouvés, 0 erreurs (14.1%)
+
+📦 Batch 31/213 (100 produits)...
+   ✅ 1000 mis à jour, 2100 non trouvés, 0 erreurs (14.6%)
+
+📦 Batch 32/213 (100 produits)...
+   ❌ Erreur pour Pharmascience Gel Douche Aloe Vera 1l: PrismaClientKnownRequestError: 
+Invalid `salines.productCategory.createMany()` invocation in
+/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:55
+
+  157     .filter(id => id) as string[];
+  158 
+  159 if (validCategoryIds.length > 0) {
+→ 160     await salines.productCategory.createMany(
+Unique constraint failed on the fields: (`productId`,`categoryId`)
+    at ei.handleRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+    at ei.request (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+    at async a (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+    at async migrateProductsBatch (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:25)
+    at async main (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:207:9) {
+  code: 'P2002',
+  meta: {
+    modelName: 'ProductCategory',
+    target: [ 'productId', 'categoryId' ]
+  },
+  clientVersion: '6.19.0'
+}
+   ❌ Erreur pour Pharmascience Gel Douche Fraicheur Marine 1L: PrismaClientKnownRequestError: 
+Invalid `salines.productCategory.createMany()` invocation in
+/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:55
+
+  157     .filter(id => id) as string[];
+  158 
+  159 if (validCategoryIds.length > 0) {
+→ 160     await salines.productCategory.createMany(
+Unique constraint failed on the fields: (`productId`,`categoryId`)
+    at ei.handleRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+    at ei.request (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+    at async a (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+    at async migrateProductsBatch (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:25)
+    at async main (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:207:9) {
+  code: 'P2002',
+  meta: {
+    modelName: 'ProductCategory',
+    target: [ 'productId', 'categoryId' ]
+  },
+  clientVersion: '6.19.0'
+}
+   ✅ 1007 mis à jour, 2191 non trouvés, 2 erreurs (15.0%)
+
+📦 Batch 33/213 (100 produits)...
+   ✅ 1020 mis à jour, 2278 non trouvés, 2 erreurs (15.5%)
+
+📦 Batch 34/213 (100 produits)...
+   ✅ 1039 mis à jour, 2359 non trouvés, 2 erreurs (16.0%)
+
+📦 Batch 35/213 (100 produits)...
+   ✅ 1058 mis à jour, 2440 non trouvés, 2 erreurs (16.4%)
+
+📦 Batch 36/213 (100 produits)...
+   ✅ 1081 mis à jour, 2517 non trouvés, 2 erreurs (16.9%)
+
+📦 Batch 37/213 (100 produits)...
+   ❌ Erreur pour Herbesan Défense 30 Comprimés: PrismaClientKnownRequestError: 
+Invalid `salines.productCategory.createMany()` invocation in
+/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:55
+
+  157     .filter(id => id) as string[];
+  158 
+  159 if (validCategoryIds.length > 0) {
+→ 160     await salines.productCategory.createMany(
+Unique constraint failed on the fields: (`productId`,`categoryId`)
+    at ei.handleRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+    at ei.request (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+    at async a (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+    at async migrateProductsBatch (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:25)
+    at async main (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:207:9) {
+  code: 'P2002',
+  meta: {
+    modelName: 'ProductCategory',
+    target: [ 'productId', 'categoryId' ]
+  },
+  clientVersion: '6.19.0'
+}
+   ✅ 1110 mis à jour, 2587 non trouvés, 3 erreurs (17.4%)
+
+📦 Batch 38/213 (100 produits)...
+   ✅ 1118 mis à jour, 2679 non trouvés, 3 erreurs (17.9%)
+
+📦 Batch 39/213 (100 produits)...
+   ✅ 1133 mis à jour, 2764 non trouvés, 3 erreurs (18.3%)
+
+📦 Batch 40/213 (100 produits)...
+   ✅ 1158 mis à jour, 2839 non trouvés, 3 erreurs (18.8%)
+
+📦 Batch 41/213 (100 produits)...
+   ✅ 1176 mis à jour, 2921 non trouvés, 3 erreurs (19.3%)
+
+📦 Batch 42/213 (100 produits)...
+   ✅ 1201 mis à jour, 2996 non trouvés, 3 erreurs (19.7%)
+
+📦 Batch 43/213 (100 produits)...
+   ✅ 1244 mis à jour, 3053 non trouvés, 3 erreurs (20.2%)
+
+📦 Batch 44/213 (100 produits)...
+   ✅ 1303 mis à jour, 3094 non trouvés, 3 erreurs (20.7%)
+
+📦 Batch 45/213 (100 produits)...
+   ✅ 1324 mis à jour, 3173 non trouvés, 3 erreurs (21.1%)
+
+📦 Batch 46/213 (100 produits)...
+   ✅ 1342 mis à jour, 3255 non trouvés, 3 erreurs (21.6%)
+
+📦 Batch 47/213 (100 produits)...
+   ✅ 1369 mis à jour, 3328 non trouvés, 3 erreurs (22.1%)
+
+📦 Batch 48/213 (100 produits)...
+   ✅ 1445 mis à jour, 3352 non trouvés, 3 erreurs (22.6%)
+
+📦 Batch 49/213 (100 produits)...
+   ✅ 1521 mis à jour, 3376 non trouvés, 3 erreurs (23.0%)
+
+📦 Batch 50/213 (100 produits)...
+   ✅ 1551 mis à jour, 3446 non trouvés, 3 erreurs (23.5%)
+
+📦 Batch 51/213 (100 produits)...
+   ✅ 1622 mis à jour, 3475 non trouvés, 3 erreurs (24.0%)
+
+📦 Batch 52/213 (100 produits)...
+   ✅ 1696 mis à jour, 3501 non trouvés, 3 erreurs (24.4%)
+
+📦 Batch 53/213 (100 produits)...
+   ❌ Erreur pour VALEBIO COLLAGENE ARTICULAIRE: PrismaClientKnownRequestError: 
+Invalid `salines.productCategory.createMany()` invocation in
+/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:55
+
+  157     .filter(id => id) as string[];
+  158 
+  159 if (validCategoryIds.length > 0) {
+→ 160     await salines.productCategory.createMany(
+Unique constraint failed on the fields: (`productId`,`categoryId`)
+    at ei.handleRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+    at ei.request (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+    at async a (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+    at async migrateProductsBatch (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:25)
+    at async main (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:207:9) {
+  code: 'P2002',
+  meta: {
+    modelName: 'ProductCategory',
+    target: [ 'productId', 'categoryId' ]
+  },
+  clientVersion: '6.19.0'
+}
+   ❌ Erreur pour HERBESAN VISION CPR60: PrismaClientKnownRequestError: 
+Invalid `salines.productCategory.createMany()` invocation in
+/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:55
+
+  157     .filter(id => id) as string[];
+  158 
+  159 if (validCategoryIds.length > 0) {
+→ 160     await salines.productCategory.createMany(
+Unique constraint failed on the fields: (`productId`,`categoryId`)
+    at ei.handleRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:228:13)
+    at ei.handleAndLogRequestError (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:174:12)
+    at ei.request (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/RequestHandler.ts:143:12)
+    at async a (/Users/victorpiamias/Desktop/SalinesBack/node_modules/@prisma/client/src/runtime/getPrismaClient.ts:833:24)
+    at async migrateProductsBatch (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:160:25)
+    at async main (/Users/victorpiamias/Desktop/SalinesBack/apps/web/scripts/migrate-optimized.ts:207:9) {
+  code: 'P2002',
+  meta: {
+    modelName: 'ProductCategory',
+    target: [ 'productId', 'categoryId' ]
+  },
+  clientVersion: '6.19.0'
+}

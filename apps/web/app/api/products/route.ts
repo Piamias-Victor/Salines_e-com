@@ -110,6 +110,10 @@ export async function GET(request: NextRequest) {
                     slug: true,
                     ean: true,
                     imageUrl: true,
+                    images: {
+                        orderBy: { position: 'asc' },
+                        take: 1,
+                    },
                     priceTTC: true,
                     promotionId: true,
                     stock: true,
@@ -141,7 +145,7 @@ export async function GET(request: NextRequest) {
             name: product.name,
             slug: product.slug,
             ean: product.ean,
-            imageUrl: product.imageUrl,
+            imageUrl: product.imageUrl || product.images?.[0]?.url || null,
             priceTTC: Number(product.priceTTC), // Convert Decimal to number
             brands: product.brands.map((b: any) => b.brandId), // Array of brand IDs (will be names when Brand model exists)
             promotionId: product.promotionId,
@@ -236,7 +240,7 @@ export async function POST(request: NextRequest) {
                 priceTTC: parseFloat(priceTTC),
                 tva: parseFloat(tva),
                 stock: parseInt(stock) || 0,
-                maxOrderQuantity: maxOrderQuantity ? parseInt(maxOrderQuantity) : null,
+                maxOrderQuantity: isMedicament ? 6 : (maxOrderQuantity ? parseInt(maxOrderQuantity) : null),
                 weight: weight ? parseFloat(weight) : null,
                 isMedicament: isMedicament || false,
                 notice,

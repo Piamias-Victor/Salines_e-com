@@ -11,7 +11,8 @@ interface ProductImageGalleryProps {
 }
 
 export function ProductImageGallery({ images, mainImage, productName }: ProductImageGalleryProps) {
-    const [selectedImage, setSelectedImage] = useState(mainImage);
+    const firstImage = images.length > 0 ? images[0].url : mainImage;
+    const [selectedImage, setSelectedImage] = useState(firstImage);
     const galleryImages = images.length > 0 ? images : (mainImage ? [{ id: 'main', url: mainImage }] : []);
 
     return (

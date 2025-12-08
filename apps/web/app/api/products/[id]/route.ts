@@ -106,7 +106,7 @@ export async function PUT(
                 priceTTC: parseFloat(priceTTC),
                 tva: parseFloat(tva),
                 stock: parseInt(stock) || 0,
-                maxOrderQuantity: maxOrderQuantity ? parseInt(maxOrderQuantity) : null,
+                maxOrderQuantity: isMedicament ? 6 : (maxOrderQuantity ? parseInt(maxOrderQuantity) : null),
                 weight: weight ? parseFloat(weight) : null,
                 isMedicament: isMedicament || false,
                 notice,

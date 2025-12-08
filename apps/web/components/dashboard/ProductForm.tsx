@@ -108,7 +108,16 @@ export default function ProductForm({ initialData, categories, brands, isEditing
     };
 
     const handleFieldChange = (field: string, value: string | boolean) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData(prev => {
+            const newData = { ...prev, [field]: value };
+
+            // Auto-définir maxOrderQuantity à 6 si c'est un médicament
+            if (field === 'isMedicament' && value === true) {
+                newData.maxOrderQuantity = '6';
+            }
+
+            return newData;
+        });
     };
 
     const handleNameChange = (name: string) => {

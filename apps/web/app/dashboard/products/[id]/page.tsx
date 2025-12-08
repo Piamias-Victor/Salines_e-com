@@ -50,7 +50,7 @@ export default function EditProductPage() {
                     description: product.description || "",
                     shortDescription: product.shortDescription || "",
                     slug: product.slug || "",
-                    imageUrl: product.imageUrl || "",
+                    imageUrl: product.imageUrl || product.images?.[0]?.url || "",
                     priceHT: product.priceHT?.toString() || "",
                     tva: product.tva?.toString() || "20",
                     priceTTC: product.priceTTC?.toString() || "",

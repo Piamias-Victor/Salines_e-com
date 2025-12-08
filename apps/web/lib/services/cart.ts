@@ -97,7 +97,10 @@ export const cartService = {
 
         // Check max order quantity
         if (product.maxOrderQuantity && quantity > product.maxOrderQuantity) {
-            throw new Error(`Max order quantity is ${product.maxOrderQuantity}`);
+            const message = product.isMedicament
+                ? `Limite légale : maximum ${product.maxOrderQuantity} unités par médicament`
+                : `Quantité maximale : ${product.maxOrderQuantity} unités`;
+            throw new Error(message);
         }
 
         // 2. Get or Create Cart
@@ -140,7 +143,10 @@ export const cartService = {
                 throw new Error(`Not enough stock. Available: ${product.stock}`);
             }
             if (product.maxOrderQuantity && newQuantity > product.maxOrderQuantity) {
-                throw new Error(`Max order quantity is ${product.maxOrderQuantity}`);
+                const message = product.isMedicament
+                    ? `Limite légale : maximum ${product.maxOrderQuantity} unités par médicament`
+                    : `Quantité maximale : ${product.maxOrderQuantity} unités`;
+                throw new Error(message);
             }
 
             return prisma.cartItem.update({
@@ -184,7 +190,10 @@ export const cartService = {
             throw new Error(`Not enough stock. Available: ${item.product.stock}`);
         }
         if (item.product.maxOrderQuantity && quantity > item.product.maxOrderQuantity) {
-            throw new Error(`Max order quantity is ${item.product.maxOrderQuantity}`);
+            const message = item.product.isMedicament
+                ? `Limite légale : maximum ${item.product.maxOrderQuantity} unités par médicament`
+                : `Quantité maximale : ${item.product.maxOrderQuantity} unités`;
+            throw new Error(message);
         }
 
         return prisma.cartItem.update({
