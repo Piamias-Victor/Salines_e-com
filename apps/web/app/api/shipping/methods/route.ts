@@ -16,7 +16,7 @@ export async function GET() {
 
         // Fixed order: PHARMACY, HOME, RELAY
         const order = ['PHARMACY', 'HOME', 'RELAY'];
-        const sorted = methods.sort((a, b) =>
+        const sorted = methods.sort((a: any, b: any) =>
             order.indexOf(a.type) - order.indexOf(b.type)
         );
 
