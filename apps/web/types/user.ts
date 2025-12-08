@@ -1,6 +1,7 @@
-// Types locaux pour remplacer les imports Prisma qui posent problème sur Vercel
-import { Gender, UserRole } from '@prisma/client';
+// Re-export Prisma enums for use throughout the app
+export { Gender, UserRole } from '@prisma/client';
 
+// Local User type definition to avoid Prisma Client import issues on Vercel
 export interface User {
     id: string;
     email: string;
@@ -20,3 +21,7 @@ export interface User {
     updatedAt: Date;
     lastLoginAt: Date | null;
 }
+
+// Type aliases for Prisma enums (fallback if import fails)
+type Gender = 'MALE' | 'FEMALE' | 'OTHER' | 'PREFER_NOT_TO_SAY';
+type UserRole = 'CUSTOMER' | 'ADMIN';
