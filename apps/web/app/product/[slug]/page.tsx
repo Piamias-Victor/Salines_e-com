@@ -83,14 +83,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
                             </h1>
                         </div>
 
-                        {/* Medication Badge */}
-                        {product.isMedicament && (
-                            <MedicationBadge
-                                maxOrderQuantity={product.maxOrderQuantity}
-                                notice={product.notice}
-                            />
-                        )}
-
                         {/* Actions Section */}
                         <AddToCartSection
                             product={{
@@ -102,6 +94,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
                             }}
                             unitPrice={unitPrice}
                         />
+
+                        {/* Medication Badge */}
+                        {product.isMedicament && (
+                            <MedicationBadge
+                                maxOrderQuantity={product.maxOrderQuantity}
+                                notice={product.notice}
+                            />
+                        )}
                     </div>
                 </div>
 

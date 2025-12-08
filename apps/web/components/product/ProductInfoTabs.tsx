@@ -39,8 +39,8 @@ export function ProductInfoTabs({ description, composition, usageTips }: Product
 
     return (
         <div className="w-full bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            {/* Mobile-first Tab Navigation */}
-            <div className="flex overflow-x-auto scrollbar-hide border-b border-gray-100">
+            {/* Mobile: Vertical tabs / Desktop: Horizontal tabs */}
+            <div className="flex flex-col md:flex-row md:border-b md:border-gray-100">
                 {tabs.map((tab) => {
                     const Icon = tab.icon;
                     const isActive = activeTab === tab.id;
@@ -50,21 +50,17 @@ export function ProductInfoTabs({ description, composition, usageTips }: Product
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
                             className={`
-                                flex-1 min-w-fit px-4 md:px-6 py-4 flex items-center justify-center gap-2
+                                flex items-center gap-2 px-6 py-4
                                 font-medium text-sm transition-all relative
+                                md:flex-1 md:justify-center
                                 ${isActive
-                                    ? 'text-[#fe0090] bg-pink-50/50'
-                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                                    ? 'text-[#fe0090] bg-pink-50/50 border-l-4 md:border-l-0 md:border-b-2 border-[#fe0090]'
+                                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50 border-l-4 md:border-l-0 border-transparent'
                                 }
                             `}
                         >
                             <Icon size={18} className={isActive ? 'text-[#fe0090]' : 'text-gray-400'} />
                             <span className="whitespace-nowrap">{tab.label}</span>
-
-                            {/* Active indicator */}
-                            {isActive && (
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#fe0090] to-pink-400" />
-                            )}
                         </button>
                     );
                 })}

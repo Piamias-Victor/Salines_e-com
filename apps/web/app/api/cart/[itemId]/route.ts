@@ -19,6 +19,12 @@ export async function PATCH(req: Request, { params }: RouteParams) {
         return NextResponse.json(updatedItem);
     } catch (error: any) {
         console.error('[CART_ITEM_PATCH]', error);
+
+        // Handle item not found as 404 instead of 500
+        if (error.message === 'Item not found') {
+            return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+        }
+
         return NextResponse.json({ error: error.message || 'Internal Error' }, { status: 500 });
     }
 }
