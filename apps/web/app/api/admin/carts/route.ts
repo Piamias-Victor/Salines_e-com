@@ -81,10 +81,10 @@ export async function GET(request: Request) {
         ]);
 
         // Calculate totals and item counts
-        const cartsWithStats = carts.map((cart) => {
-            const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        const cartsWithStats = carts.map((cart: any) => {
+            const itemCount = cart.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
             const total = cart.items.reduce(
-                (sum, item) => sum + Number(item.product.priceTTC) * item.quantity,
+                (sum: number, item: any) => sum + Number(item.product.priceTTC) * item.quantity,
                 0
             );
 
