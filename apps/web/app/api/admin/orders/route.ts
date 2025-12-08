@@ -72,10 +72,11 @@ export async function GET(request: Request) {
         ]);
 
         // Calculate item counts for each order
-        const ordersWithStats = orders.map((order) => {
-            const totalItems = order.items.reduce((sum, item) => sum + item.quantity, 0);
-            const pendingItems = order.items.filter(item => item.status === 'PENDING').length;
-            const preparedItems = order.items.filter(item => item.status === 'PREPARED').length;
+        // Calculate item counts for each order
+        const ordersWithStats = orders.map((order: any) => {
+            const totalItems = order.items.reduce((sum: number, item: any) => sum + item.quantity, 0);
+            const pendingItems = order.items.filter((item: any) => item.status === 'PENDING').length;
+            const preparedItems = order.items.filter((item: any) => item.status === 'PREPARED').length;
 
             return {
                 ...order,
