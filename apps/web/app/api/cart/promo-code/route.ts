@@ -17,7 +17,7 @@ export async function POST(req: Request) {
         }
 
         // Calculer le total du panier (après promotions produits)
-        const cartTotal = cart.items.reduce((acc, item) => {
+        const cartTotal = cart.items.reduce((acc: number, item: any) => {
             const price = item.appliedPromotionPrice
                 ? Number(item.appliedPromotionPrice)
                 : Number(item.product.priceTTC);
