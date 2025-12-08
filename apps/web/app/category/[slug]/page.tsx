@@ -59,7 +59,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     });
 
     // Serialize products to fix Decimal issue
-    const mainCategoryProducts = mainCategoryProductsRaw.map(p => ({
+    const mainCategoryProducts = mainCategoryProductsRaw.map((p: any) => ({
         ...p,
         priceHT: Number(p.priceHT),
         priceTTC: Number(p.priceTTC),
@@ -85,7 +85,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
                 take: 4,
             });
 
-            const products = productsRaw.map(p => ({
+            const products = productsRaw.map((p: any) => ({
                 ...p,
                 priceHT: Number(p.priceHT),
                 priceTTC: Number(p.priceTTC),
@@ -117,7 +117,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         take: 5,
     });
 
-    const newProducts = newProductsRaw.map(p => ({
+    const newProducts = newProductsRaw.map((p: any) => ({
         ...p,
         priceHT: Number(p.priceHT),
         priceTTC: Number(p.priceTTC),
@@ -149,7 +149,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         take: 5,
     });
 
-    const promoProducts = promoProductsRaw.map(p => ({
+    const promoProducts = promoProductsRaw.map((p: any) => ({
         ...p,
         priceHT: Number(p.priceHT),
         priceTTC: Number(p.priceTTC),
