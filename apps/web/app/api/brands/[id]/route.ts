@@ -53,7 +53,7 @@ export async function PUT(
         } = body;
 
         // Transaction to handle product updates cleanly
-        const brand = await prisma.$transaction(async (tx) => {
+        const brand = await prisma.$transaction(async (tx: any) => {
             // 1. Update basic fields
             const updated = await tx.brand.update({
                 where: { id },
