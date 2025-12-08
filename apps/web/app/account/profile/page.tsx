@@ -50,7 +50,7 @@ export default function ProfilePage() {
                 firstName: formData.firstName,
                 lastName: formData.lastName,
                 phone: formData.phone || null,
-                gender: formData.gender || null,
+                gender: (formData.gender as any) || null,
                 birthDate: formData.birthDate ? new Date(formData.birthDate) : null,
                 newsletter: formData.newsletter,
             });

@@ -95,7 +95,7 @@ export async function register(data: RegisterData): Promise<AuthResponse> {
     const { password: _, ...userWithoutPassword } = user;
 
     return {
-        user: userWithoutPassword,
+        user: userWithoutPassword as any,
         ...tokens,
     };
 }
@@ -147,7 +147,7 @@ export async function login(data: LoginData): Promise<AuthResponse> {
     const { password: _, ...userWithoutPassword } = user;
 
     return {
-        user: userWithoutPassword,
+        user: userWithoutPassword as any,
         ...tokens,
     };
 }
@@ -167,7 +167,7 @@ export async function getUserById(userId: string): Promise<Omit<User, 'password'
     }
 
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return userWithoutPassword as any;
 }
 
 /**
@@ -186,7 +186,7 @@ export async function updateProfile(
     });
 
     const { password: _, ...userWithoutPassword } = user;
-    return userWithoutPassword;
+    return userWithoutPassword as any;
 }
 
 /**
