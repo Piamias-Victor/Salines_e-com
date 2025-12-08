@@ -1,7 +1,9 @@
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { hashPassword, comparePassword, validatePassword } from './password';
 import { generateTokens, type TokenPayload } from './jwt';
-import type { User } from '@prisma/client';
+import type { User } from '@/types/user';
 import { mailService } from '@/lib/services/mail';
 
 export interface RegisterData {

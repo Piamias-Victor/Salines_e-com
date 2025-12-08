@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import type { User } from '@prisma/client';
+import type { User } from '@/types/user';
 
 interface AuthContextType {
     user: Omit<User, 'password'> | null;
