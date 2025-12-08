@@ -14,6 +14,7 @@ interface ProductPricingProps {
     };
     onChange: (field: string, value: string) => void;
     onPriceChange: (field: 'HT' | 'TTC', value: string) => void;
+
 }
 
 export function ProductPricing({ formData, onChange, onPriceChange }: ProductPricingProps) {
