@@ -56,7 +56,7 @@ export async function PUT(
 
 
         // Transaction to handle product updates cleanly
-        const promotion = await prisma.$transaction(async (tx) => {
+        const promotion = await prisma.$transaction(async (tx: any) => {
             // 1. Update basic fields
             const updated = await tx.promotion.update({
                 where: { id },
