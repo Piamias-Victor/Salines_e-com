@@ -69,7 +69,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
     // Fetch products for each subcategory (top 4)
     const subcategoriesWithProducts = await Promise.all(
-        category.children.map(async (subcat) => {
+        category.children.map(async (subcat: any) => {
             const productsRaw = await prisma.product.findMany({
                 where: {
                     isActive: true,
