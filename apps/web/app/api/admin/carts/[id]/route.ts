@@ -70,9 +70,9 @@ export async function GET(
         }
 
         // Calculate totals
-        const itemCount = cart.items.reduce((sum, item) => sum + item.quantity, 0);
+        const itemCount = cart.items.reduce((sum: number, item) => sum + item.quantity, 0);
         const subtotal = cart.items.reduce(
-            (sum, item) => sum + Number(item.product.priceTTC) * item.quantity,
+            (sum: number, item) => sum + Number(item.product.priceTTC) * item.quantity,
             0
         );
 
