@@ -38,7 +38,7 @@ export async function POST(request: Request) {
 
         // Find applicable rate based on weight
         const applicableRate = method.rates.find(
-            (rate) => weight >= Number(rate.minWeight) && weight <= Number(rate.maxWeight)
+            (rate: any) => weight >= Number(rate.minWeight) && weight <= Number(rate.maxWeight)
         );
 
         if (!applicableRate) {
