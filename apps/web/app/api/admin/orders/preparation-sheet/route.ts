@@ -61,8 +61,8 @@ export async function POST(request: Request) {
             orders: string[]; // Order numbers where this product appears
         }>();
 
-        orders.forEach((order) => {
-            order.items.forEach((item) => {
+        orders.forEach((order: any) => {
+            order.items.forEach((item: any) => {
                 const existing = productMap.get(item.productId);
                 if (existing) {
                     existing.totalQuantity += item.quantity;
@@ -86,10 +86,10 @@ export async function POST(request: Request) {
             a.productName.localeCompare(b.productName)
         );
 
-        const totalItems = groupedProducts.reduce((sum, p) => sum + p.totalQuantity, 0);
+        const totalItems = groupedProducts.reduce((sum: number, p: any) => sum + p.totalQuantity, 0);
 
         return NextResponse.json({
-            orders: orders.map(o => ({
+            orders: orders.map((o: any) => ({
                 id: o.id,
                 orderNumber: o.orderNumber,
                 customer: o.user ? `${o.user.firstName} ${o.user.lastName}` : o.guestEmail,
