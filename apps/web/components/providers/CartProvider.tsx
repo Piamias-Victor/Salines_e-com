@@ -15,6 +15,7 @@ interface CartItem {
         weight: number | null;
         stock: number;
         maxOrderQuantity: number | null;
+        isMedicament: boolean;
     };
     appliedPromotionId?: string | null;
     appliedPromotionPrice?: number | null;
