@@ -31,7 +31,7 @@ async function main() {
 
     // 2. Launch Browser
     const browser = await puppeteer.launch({
-        headless: 'new', // Use new headless mode
+        headless: true, // Use headless mode
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
