@@ -478,6 +478,9 @@ model Order {
   stripePaymentIntentId String? @unique // Stripe Payment Intent ID
   stripeChargeId        String? // Stripe Charge ID
 
+  // Additional Data
+  metadata    Json?     // Flexible field for custom data (e.g., medical info)
+
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

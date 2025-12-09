@@ -51,6 +51,8 @@ export const cartService = {
                                 weight: true,
                                 stock: true,
                                 maxOrderQuantity: true,
+                                isMedicament: true,
+                                notice: true,
                                 images: {
                                     take: 1,
                                     orderBy: { position: 'asc' },

@@ -114,6 +114,16 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
 
     // Create order
     // Note: This is simplified - you'll need to handle addresses properly
+    // Extract medical info from metadata
+    const { medical_height, medical_weight, medical_agreement } = paymentIntent.metadata;
+
+    const metadata: any = {};
+    if (medical_height) metadata.medical_height = medical_height;
+    if (medical_weight) metadata.medical_weight = medical_weight;
+    if (medical_agreement) metadata.medical_agreement = medical_agreement;
+
+    // Create order
+    // Note: This is simplified - you'll need to handle addresses properly
     const order = await prisma.order.create({
         data: {
             orderNumber,
@@ -129,6 +139,9 @@ async function handlePaymentSuccess(paymentIntent: Stripe.PaymentIntent) {
             total: Number(total),
             stripePaymentIntentId: paymentIntent.id,
             stripeChargeId: paymentIntent.latest_charge as string,
+
+            // Medical Metadata
+            metadata: Object.keys(metadata).length > 0 ? metadata : undefined,
 
             // Promo Code
             promoCodeId,

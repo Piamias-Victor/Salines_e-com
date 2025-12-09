@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { cartId, userId, email } = body;
+        const { cartId, userId, email, medicalInfo } = body;
 
         if (!cartId) {
             return NextResponse.json(
@@ -31,6 +31,17 @@ export async function POST(request: Request) {
                 { error: 'Cart is empty or not found' },
                 { status: 404 }
             );
+        }
+
+        // Validate medical info if medicines are present
+        const hasMedicines = cart.items.some(item => item.product.isMedicament);
+        if (hasMedicines) {
+            if (!medicalInfo || !medicalInfo.height || !medicalInfo.weight || !medicalInfo.agreement) {
+                return NextResponse.json(
+                    { error: 'Medical information is required for products containing medication' },
+                    { status: 400 }
+                );
+            }
         }
 
         // Calculate subtotal using applied promotion prices
@@ -109,6 +120,23 @@ export async function POST(request: Request) {
         // Calculate total
         const total = subtotalAfterDiscount + shippingCost;
 
+        // Prepare metadata
+        const metadata: any = {
+            cartId,
+            userId: userId || 'guest',
+            subtotal: subtotal.toFixed(2),
+            promoDiscount: promoDiscount.toFixed(2),
+            promoCode: promoCode?.code || null,
+            shippingCost: shippingCost.toFixed(2),
+            total: total.toFixed(2),
+        };
+
+        if (medicalInfo) {
+            metadata.medical_height = medicalInfo.height;
+            metadata.medical_weight = medicalInfo.weight;
+            metadata.medical_agreement = String(medicalInfo.agreement);
+        }
+
         // Create Payment Intent
         const paymentIntent = await stripe.paymentIntents.create({
             amount: Math.round(total * 100), // Stripe uses cents
@@ -117,15 +145,7 @@ export async function POST(request: Request) {
             automatic_payment_methods: {
                 enabled: true,
             },
-            metadata: {
-                cartId,
-                userId: userId || 'guest',
-                subtotal: subtotal.toFixed(2),
-                promoDiscount: promoDiscount.toFixed(2),
-                promoCode: promoCode?.code || null,
-                shippingCost: shippingCost.toFixed(2),
-                total: total.toFixed(2),
-            },
+            metadata,
         });
 
         return NextResponse.json({
