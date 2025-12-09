@@ -1,7 +1,7 @@
 
 import puppeteer from 'puppeteer';
 import fs from 'fs';
-import { Prism } from '@prisma/client'; // Assuming Prisma client availability, adjust import if needed
+import { PrismaClient } from '@prisma/client'; // Assuming Prisma client availability, adjust import if needed
 // Mocking Prisma for POC if actual import fails, but assuming user has it setup based on previous context.
 // Actually, I should check where PrismaClient is. Usually `libs/db` or generated client.
 // Let's assume standard import for now or use the one from `apps/web/scripts/populate-brand-images.ts`
@@ -14,7 +14,7 @@ async function main() {
 
     // 1. Launch Browser
     const browser = await puppeteer.launch({
-        headless: "new",
+        headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     const page = await browser.newPage();
