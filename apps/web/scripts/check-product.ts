@@ -33,8 +33,8 @@ async function checkProduct() {
     console.log(`Nom: ${product.name}`);
     console.log(`EAN: ${product.ean}`);
     console.log(`Slug: ${product.slug}`);
-    console.log(`Prix HT: ${product.priceExcludingTax}`);
-    console.log(`Prix TTC: ${product.priceIncludingTax}`);
+    console.log(`Prix HT: ${product.priceHT}`);
+    console.log(`Prix TTC: ${product.priceTTC}`);
     console.log(`Stock: ${product.stock}`);
     console.log(`Actif: ${product.isActive}`);
     console.log(`\nDescription: ${product.description?.substring(0, 200)}...`);
