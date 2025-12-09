@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 :root {
+  color-scheme: light;
   --background: #fef9fc;
   /* Pastel pink background - plus discret */
   --foreground: #3f4c53;
@@ -23,12 +24,7 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1a1a1a;
-    --foreground: #ededed;
-  }
-}
+
 
 body {
   background: var(--background);
