@@ -126,9 +126,9 @@ export function CartDrawer() {
                                 <div key={item.id} className={`group flex gap-4 animate-in slide-in-from-bottom-2 duration-500 ${isStockIssue ? 'bg-red-50 p-2 rounded-xl border border-red-100' : ''}`}>
                                     {/* Image */}
                                     <div className="relative w-20 h-20 md:w-24 md:h-24 flex-shrink-0 bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 group-hover:border-pink-100 transition-colors">
-                                        {item.product.imageUrl ? (
+                                        {(item.product.imageUrl || (item.product as any).images?.[0]?.url) ? (
                                             <Image
-                                                src={item.product.imageUrl}
+                                                src={item.product.imageUrl || (item.product as any).images?.[0]?.url}
                                                 alt={item.product.name}
                                                 fill
                                                 className="object-contain p-2"

@@ -104,7 +104,7 @@ export function MobileNav() {
                 title="Menu"
             >
                 {/* Search Bar */}
-                <div className="p-4 border-b border-gray-200">
+                {/* <div className="p-4 border-b border-gray-200">
                     <div className="relative">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
                         <input
@@ -113,7 +113,7 @@ export function MobileNav() {
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#fe0090] focus:border-transparent"
                         />
                     </div>
-                </div>
+                </div> */}
 
                 {/* Categories */}
                 <div className="py-2">
@@ -147,10 +147,23 @@ export function MobileNav() {
                     </Link>
 
                     {/* Subcategories would go here */}
-                    <div className="border-t border-gray-200 mt-2 pt-2">
-                        <p className="px-4 py-2 text-sm text-gray-500">
-                            Sous-catégories à venir...
-                        </p>
+                    <div className="border-t border-gray-200 mt-2">
+                        {selectedCategory?.children && selectedCategory.children.length > 0 ? (
+                            selectedCategory.children.map((child) => (
+                                <Link
+                                    key={child.id}
+                                    href={`/category/${child.slug}`}
+                                    onClick={closeAllMenus}
+                                    className="block px-4 py-3 text-[#3f4c53] hover:bg-gray-50 hover:text-[#fe0090] transition-colors border-b border-gray-50 last:border-0"
+                                >
+                                    {child.name}
+                                </Link>
+                            ))
+                        ) : (
+                            <p className="px-4 py-4 text-sm text-gray-500 italic">
+                                Aucune sous-catégorie
+                            </p>
+                        )}
                     </div>
                 </div>
             </Drawer>

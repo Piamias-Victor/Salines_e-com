@@ -7,6 +7,8 @@ import { getActivePromotion, calculatePromotionPrice, formatPromotionBadge } fro
 import { ReassuranceBar } from './ReassuranceBar';
 import { useCart } from '@/hooks/useCart';
 
+import { useWishlist } from '@/contexts/WishlistContext';
+
 interface AddToCartSectionProps {
     product: {
         id: string;
@@ -21,6 +23,17 @@ interface AddToCartSectionProps {
 export function AddToCartSection({ product, unitPrice }: AddToCartSectionProps) {
     const [quantity, setQuantity] = useState(1);
     const { addToCart, isAdding, cart } = useCart();
+    const { addToWishlist, removeFromWishlist, isInWishlist, isLoading: isWishlistLoading } = useWishlist();
+
+    const isLiked = isInWishlist(product.id);
+
+    const handleToggleWishlist = async () => {
+        if (isLiked) {
+            await removeFromWishlist(product.id);
+        } else {
+            await addToWishlist(product.id);
+        }
+    };
 
     // Calculate promotion
     const activePromotion = getActivePromotion(product as any);
@@ -198,8 +211,15 @@ export function AddToCartSection({ product, unitPrice }: AddToCartSectionProps) 
                     </button>
 
                     {/* Wishlist */}
-                    <button className="p-3 md:p-4 rounded-xl border-2 border-gray-100 text-gray-400 hover:border-[#fe0090] hover:text-[#fe0090] hover:bg-pink-50 transition-all duration-300 flex items-center justify-center">
-                        <Heart size={24} />
+                    <button
+                        onClick={handleToggleWishlist}
+                        disabled={isWishlistLoading}
+                        className={`p-3 md:p-4 rounded-xl border-2 transition-all duration-300 flex items-center justify-center ${isLiked
+                                ? 'border-[#fe0090] text-[#fe0090] bg-pink-50'
+                                : 'border-gray-100 text-gray-400 hover:border-[#fe0090] hover:text-[#fe0090] hover:bg-pink-50'
+                            }`}
+                    >
+                        <Heart size={24} fill={isLiked ? "currentColor" : "none"} />
                     </button>
                 </div>
 

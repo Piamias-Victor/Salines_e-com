@@ -76,7 +76,7 @@ export function MegaMenu() {
                         >
                             <Link
                                 href={`/category/${category.slug}`}
-                                className={`block px-4 py-2 text-sm font-bold uppercase tracking-wide rounded-lg transition-colors ${category.highlightColor
+                                className={`block px-4 py-2 text-sm font-bold uppercase tracking-wide rounded-lg transition-colors whitespace-nowrap ${category.highlightColor
                                     ? 'hover:opacity-90'
                                     : 'text-gray-900 hover:bg-gray-50'
                                     } flex items-center justify-between gap-1 group`}

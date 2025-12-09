@@ -76,7 +76,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 {/* Image Container - Larger on mobile */}
                 <div className="relative aspect-square overflow-hidden bg-white">
                     <Image
-                        src={product.imageUrl || '/placeholder.png'}
+                        src={product.imageUrl || (product as any).images?.[0]?.url || '/placeholder.png'}
                         alt={product.name}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-105 p-2"

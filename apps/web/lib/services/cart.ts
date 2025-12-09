@@ -51,6 +51,11 @@ export const cartService = {
                                 weight: true,
                                 stock: true,
                                 maxOrderQuantity: true,
+                                images: {
+                                    take: 1,
+                                    orderBy: { position: 'asc' },
+                                    select: { url: true },
+                                },
                             },
                         },
                         appliedPromotion: true,

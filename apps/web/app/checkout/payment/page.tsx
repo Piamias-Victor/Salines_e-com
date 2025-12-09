@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Elements } from '@stripe/react-stripe-js';
 import { loadStripe } from '@stripe/stripe-js';
 import { PaymentForm } from '@/components/checkout/PaymentForm';
@@ -150,8 +151,19 @@ export default function CheckoutPaymentPage() {
                             <div className="space-y-3 mb-4 pb-4 border-b border-gray-200">
                                 {cart?.items.map((item) => (
                                     <div key={item.id} className="flex items-center gap-3">
-                                        <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                                            <ShoppingBag size={20} className="text-gray-400" />
+                                        <div className="relative w-12 h-12 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                            {(item.product.imageUrl || (item.product as any).images?.[0]?.url) ? (
+                                                <Image
+                                                    src={item.product.imageUrl || (item.product as any).images?.[0]?.url}
+                                                    alt={item.product.name}
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            ) : (
+                                                <div className="flex items-center justify-center w-full h-full">
+                                                    <ShoppingBag size={20} className="text-gray-400" />
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="flex-1">
                                             <p className="text-sm font-medium text-gray-900 line-clamp-1">

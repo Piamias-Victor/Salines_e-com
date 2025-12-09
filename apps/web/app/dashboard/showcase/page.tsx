@@ -35,6 +35,7 @@ interface Category {
     searchPosition: number; // For Search
     isActive: boolean;
     children?: Category[];
+    parents?: { id: string }[];
 }
 
 interface Brand {
@@ -207,7 +208,10 @@ export default function ShowcasePage() {
 
     const getActiveList = (): ShowcaseItem[] => {
         if (activeTab === 'mega-menu') {
-            return [...categories].sort(sortByPosition('menuPosition'));
+            // Filter to show only root categories (no parents)
+            return [...categories]
+                .filter(c => !c.parents || c.parents.length === 0)
+                .sort(sortByPosition('menuPosition'));
         }
         if (activeTab === 'showcase') {
             if (showcaseSubTab === 'univers') return [...categories].sort(sortByPosition('position'));
@@ -243,27 +247,22 @@ export default function ShowcasePage() {
         if (!over || active.id === over.id) return;
 
         const list = getActiveList();
+        // Since list might be filtered (for Mega Menu), we need to handle updates carefully
         const oldIndex = list.findIndex((item: any) => item.id === active.id);
         const newIndex = list.findIndex((item: any) => item.id === over.id);
 
         const newList = arrayMove(list, oldIndex, newIndex);
 
         // Update positions to reflect the new order immediately
-        // This is crucial because getActiveList sorts by position. 
-        // If we don't update positions, the list will revert to the old order on next render.
         const field = getPositionField();
         const isProducts = activeTab === 'showcase' && showcaseSubTab === 'products';
 
-        let currentPos = isProducts ? 0 : 1; // Products are 0-indexed, others 1-indexed (0 is hidden)
+        let currentPos = isProducts ? 0 : 1;
 
-        const updatedList = newList.map((item: any) => {
-            // For products, always update position
+        const updatedSubset = newList.map((item: any) => {
             if (isProducts) {
                 return { ...item, [field]: currentPos++ };
             }
-
-            // For others, only update if it's a visible item (position > 0)
-            // Hidden items (position 0) stay 0 and are not reordered relative to visible ones
             if ((item as any)[field] > 0) {
                 return { ...item, [field]: currentPos++ };
             }
@@ -271,56 +270,55 @@ export default function ShowcasePage() {
         });
 
         // Update state based on current tab and type
+        // Use helper to merge updated subset back into full list
+        const mergeUpdates = (fullList: any[], updates: any[]) => {
+            return fullList.map(item => {
+                const updatedItem = updates.find(u => u.id === item.id);
+                return updatedItem || item;
+            });
+        }
+
         if (activeTab === 'mega-menu') {
-            setCategories(updatedList as Category[]);
+            setCategories(prev => mergeUpdates(prev, updatedSubset) as Category[]);
         }
         else if (activeTab === 'showcase') {
-            if (showcaseSubTab === 'univers') setCategories(updatedList as Category[]);
-            if (showcaseSubTab === 'brands') setBrands(updatedList as Brand[]);
-            if (showcaseSubTab === 'products') setFeaturedProducts(updatedList as FeaturedProduct[]);
+            if (showcaseSubTab === 'univers') setCategories(prev => mergeUpdates(prev, updatedSubset) as Category[]);
+            if (showcaseSubTab === 'brands') setBrands(prev => mergeUpdates(prev, updatedSubset) as Brand[]);
+            if (showcaseSubTab === 'products') setFeaturedProducts(updatedSubset as FeaturedProduct[]); // Products list is not filtered, can replace
         }
         else if (activeTab === 'search') {
-            if (searchSubTab === 'categories') setCategories(updatedList as Category[]);
-            if (searchSubTab === 'brands') setBrands(updatedList as Brand[]);
+            if (searchSubTab === 'categories') setCategories(prev => mergeUpdates(prev, updatedSubset) as Category[]);
+            if (searchSubTab === 'brands') setBrands(prev => mergeUpdates(prev, updatedSubset) as Brand[]);
         }
-    };
-
-    const updateListInState = (originalList: any[], sortedSubset: any[]) => {
-        // We need to merge the sorted subset back into the original list (which might contain other items not in subset if we filtered)
-        // But here getActiveList returns ALL items of that type, just sorted.
-        // So we can just return the sorted list? 
-        // Yes, because we flattened categories.
-        return sortedSubset;
     };
 
     const handleToggleVisibility = (id: string) => {
         const field = getPositionField();
         const list = getActiveList();
 
-        // Calculate max position from the *current* list state to append to the end
+        // Calculate max position from the *current filtered* list state to append to the end
         const maxPos = Math.max(0, ...list.map((i: any) => (i as any)[field] as number));
 
-        const newList = list.map((item: any) => {
-            if (item.id === id) {
-                const currentVal = (item as any)[field] as number;
-                if (currentVal > 0) {
-                    return { ...item, [field]: 0 };
-                } else {
-                    return { ...item, [field]: maxPos + 1 };
-                }
-            }
-            return item;
-        });
+        const updatedItem = list.find((i: any) => i.id === id);
+        if (!updatedItem) return;
+
+        const currentVal = (updatedItem as any)[field] as number;
+        const newVal = currentVal > 0 ? 0 : maxPos + 1;
+
+        const newItem = { ...updatedItem, [field]: newVal };
+
+        // Merge update back to global state
+        const updateState = (prev: any[]) => prev.map(item => item.id === id ? newItem : item);
 
         // Update state
-        if (activeTab === 'mega-menu') setCategories(newList as Category[]);
+        if (activeTab === 'mega-menu') setCategories(prev => updateState(prev) as Category[]);
         else if (activeTab === 'showcase') {
-            if (showcaseSubTab === 'univers') setCategories(newList as Category[]);
-            if (showcaseSubTab === 'brands') setBrands(newList as Brand[]);
+            if (showcaseSubTab === 'univers') setCategories(prev => updateState(prev) as Category[]);
+            if (showcaseSubTab === 'brands') setBrands(prev => updateState(prev) as Brand[]);
         }
         else if (activeTab === 'search') {
-            if (searchSubTab === 'categories') setCategories(newList as Category[]);
-            if (searchSubTab === 'brands') setBrands(newList as Brand[]);
+            if (searchSubTab === 'categories') setCategories(prev => updateState(prev) as Category[]);
+            if (searchSubTab === 'brands') setBrands(prev => updateState(prev) as Brand[]);
         }
     };
 

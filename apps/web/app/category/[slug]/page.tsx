@@ -55,7 +55,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
             brands: { include: { brand: true } },
         },
         orderBy: { position: 'asc' },
-        take: 5,
+        take: 20,
     });
 
     // Serialize products to fix Decimal issue
